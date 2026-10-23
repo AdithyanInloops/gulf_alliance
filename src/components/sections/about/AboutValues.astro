@@ -1,5 +1,5 @@
 ---
-/** About › Our Core Values (as designed): 4 + 3 grid of numbered white cards. */
+/** About › Our Core Values: 4 + 3 grid of white cards. */
 import IconTile from '@/components/ui/IconTile.astro';
 import Section from '@/components/ui/Section.astro';
 import { getContent } from '@/data';
@@ -11,13 +11,10 @@ const { values } = getContent(Astro.url).about;
   <h2 id="values-title" class="values__title" data-reveal>{values.title}</h2>
   <ul class="values" data-reveal-group="up">
     {
-      values.items.map((v, i) => (
+      values.items.map((v) => (
         <li class="values__card">
           <IconTile icon={v.icon} variant="light" size="sm" />
-          <h3 class="values__name">
-            <span class="values__num">{String(i + 1).padStart(2, '0')}</span>
-            {v.title}
-          </h3>
+          <h3 class="values__name">{v.title}</h3>
           <p class="values__text">{v.text}</p>
         </li>
       ))
@@ -45,8 +42,7 @@ const { values } = getContent(Astro.url).about;
   }
   .values__card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
   .values__card:last-child { grid-column: span 2; }
-  .values__name { display: flex; align-items: baseline; gap: 8px; margin-top: 18px; font-size: 1.2rem; color: var(--color-navy-950); }
-  .values__num { font-family: var(--font-display); font-size: var(--fs-2xs); font-weight: 700; color: var(--color-orange-600); }
+  .values__name { margin-top: 18px; font-size: 1.2rem; color: var(--color-navy-950); }
   .values__text { margin-top: 12px; font-size: var(--fs-small); line-height: 1.7; color: var(--color-ink); }
 
   @media (max-width: 1023px) {

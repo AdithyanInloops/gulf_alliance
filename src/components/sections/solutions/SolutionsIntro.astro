@@ -24,7 +24,7 @@ const { intro } = solutionsPage;
         solutions.map((s, i) => (
           <li>
             <a href={`#area-${s.slug}`} class="si__card">
-              <IconTile icon={s.icon} size="sm" variant={s.slug === 'josoorkom' ? 'gold' : 'light'} />
+              <IconTile icon={s.icon} size="sm" />
               <span class="si__num">{String(i + 1).padStart(2, '0')}</span>
               <span class="si__name">{s.name}</span>
               <Icon name="arrow-down" size={16} strokeWidth={2.2} class="si__arrow" />

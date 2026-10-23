@@ -21,7 +21,7 @@ const itemId = (title: string) => `${solution.slug}-${title.toLowerCase().replac
 
 <Section id="overview" tone="page" labelledby="overview-title">
   <div class="so__head" data-reveal>
-    <Eyebrow variant={solution.slug === 'josoorkom' ? 'line' : 'text'}>{overview.eyebrow}</Eyebrow>
+    <Eyebrow>{overview.eyebrow}</Eyebrow>
     <h2 id="overview-title">{overview.title}</h2>
     <p class="so__text">{overview.text}</p>
   </div>

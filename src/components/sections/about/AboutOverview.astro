@@ -28,9 +28,9 @@ const { overview } = about;
       {
         solutions.map((s) => (
           <li>
-            <a href={R.solution(s.slug)} class:list={['ao__tile', { 'ao__tile--gold': s.slug === 'josoorkom' }]}>
+            <a href={R.solution(s.slug)} class="ao__tile">
               <span class="ao__tile-top">
-                <IconTile icon={s.icon} variant={s.slug === 'josoorkom' ? 'gold' : 'navy'} size="sm" />
+                <IconTile icon={s.icon} variant="navy" size="sm" />
                 <Icon name="arrow-up-right" size={18} strokeWidth={2} class="ao__tile-go icon-dir" />
               </span>
               <span class="ao__tile-title">{s.name}</span>
@@ -95,7 +95,6 @@ const { overview } = about;
     transition: border-color 0.25s, background-color 0.25s, transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
   }
   .ao__tile:hover { border-color: var(--color-blue-200); background: #fff; transform: translateY(-3px); box-shadow: var(--shadow-md); }
-  .ao__tile--gold { border-color: rgb(248 184 77 / 0.45); background: #fffaf0; }
   .ao__tile-top { display: flex; align-items: center; justify-content: space-between; }
   .ao__tile :global(.ao__tile-go) { color: var(--color-blue-400); transition: color 0.25s; }
   .ao__tile:hover :global(.ao__tile-go) { color: var(--color-orange-600); }

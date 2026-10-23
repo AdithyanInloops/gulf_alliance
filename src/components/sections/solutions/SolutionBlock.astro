@@ -3,8 +3,8 @@
  * One solution area on the Solutions page: numbered badge, title,
  * description, check list of its offerings and CTA on one side; photo and an
  * info card (the solution page's overview + enquiry link) on the other.
- * Blocks alternate sides. For Josoorkom the info-card link is "Visit
- * Josoorkom", which opens the sign-up dialog before going to the platform.
+ * Blocks alternate sides. Every solution is styled the same; for Josoorkom the
+ * info-card link is "Visit Josoorkom", which opens the sign-up dialog first.
  */
 import Badge from '@/components/ui/Badge.astro';
 import Button from '@/components/ui/Button.astro';
@@ -23,12 +23,11 @@ interface Props {
 const { solution: s, index } = Astro.props;
 const { R, ui } = getContent(Astro.url);
 const reverse = index % 2 === 1;
-const isJosoorkom = s.slug === 'josoorkom';
-const tone = isJosoorkom ? 'gold' : index % 2 === 0 ? 'orange' : 'blue';
+const tone = index % 2 === 0 ? 'orange' : 'blue';
 const link = s.page.finalCta.cta;
 ---
 
-<article class:list={['sb', { 'sb--reverse': reverse, 'sb--feature': isJosoorkom }]} id={`area-${s.slug}`} aria-labelledby={`area-${s.slug}-title`} data-reveal>
+<article class:list={['sb', { 'sb--reverse': reverse }]} id={`area-${s.slug}`} aria-labelledby={`area-${s.slug}-title`} data-reveal>
   <div class="sb__copy">
     <Badge tone={tone}>{`${String(index + 1).padStart(2, '0')} — ${s.shortName}`}</Badge>
     <h2 id={`area-${s.slug}-title`} class="sb__title">{s.overviewCard.title}</h2>
@@ -36,7 +35,7 @@ const link = s.page.finalCta.cta;
     <div class="sb__box">
       <CheckList items={s.page.items.map((i) => i.title)} columns={2} strong />
     </div>
-    <Button href={R.solution(s.slug)} variant={isJosoorkom ? 'gold' : 'navy'}>{s.overviewCard.cta}</Button>
+    <Button href={R.solution(s.slug)} variant="navy">{s.overviewCard.cta}</Button>
   </div>
 
   <div class="sb__media">
@@ -47,7 +46,7 @@ const link = s.page.finalCta.cta;
       <p class="sb__info-label">{s.page.overview.eyebrow}</p>
       <h3 class="sb__info-title">{s.page.overview.title}</h3>
       <p class="sb__info-text">{s.page.overview.text}</p>
-      <a href={link.href} class:list={['sb__info-link', { 'sb__info-link--gold': isJosoorkom }]} target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
+      <a href={link.href} class="sb__info-link" target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
         <span>{link.label}</span>
         <Icon name={link.external ? 'square-arrow-out-up-right' : 'arrow-right'} size={18} strokeWidth={2} class="icon-dir" />
         {link.external && <span class="visually-hidden">{ui.newTab}</span>}
@@ -69,7 +68,6 @@ const link = s.page.finalCta.cta;
     box-shadow: var(--shadow-sm);
     scroll-margin-top: calc(var(--header-h) + 20px);
   }
-  .sb--feature { border-color: rgb(248 184 77 / 0.5); box-shadow: 0 0 0 4px rgb(248 184 77 / 0.12), var(--shadow-sm); }
   .sb--reverse .sb__copy { order: 2; }
   .sb__title { margin-top: 16px; font-size: clamp(1.6rem, 1.25rem + 1.1vw, 2.2rem); color: var(--color-navy-950); }
   .sb__text { margin-top: 14px; font-size: var(--fs-body); line-height: 1.75; color: var(--color-ink); }
@@ -119,9 +117,6 @@ const link = s.page.finalCta.cta;
   .sb__info-text + .sb__info-link { margin-top: 18px; }
   .sb__info-link :global(svg) { flex: none; color: var(--color-orange-600); }
   .sb__info-link:hover { color: var(--color-orange-600); }
-  .sb__info-link--gold { background: var(--color-navy-900); color: #fff; }
-  .sb__info-link--gold :global(svg) { color: var(--color-gold-500); }
-  .sb__info-link--gold:hover { background: var(--color-navy-800); color: var(--color-gold-400); }
 
   @media (max-width: 999px) {
     .sb { grid-template-columns: minmax(0, 1fr); }

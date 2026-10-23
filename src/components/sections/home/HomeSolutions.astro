@@ -1,22 +1,26 @@
 ---
 /**
- * Home › Our Solutions: heading row and a grid of flip boxes — all seven
- * solutions, Josoorkom included, styled the same (the seventh card sits centred
- * on the last row). The flip follows technoorbits.com.sa: a white front (big icon,
+ * Home › Our Solutions: heading row, a grid of flip boxes and the Josoorkom
+ * banner. The flip follows technoorbits.com.sa: a white front (big icon,
  * name, summary) flips up — around the horizontal axis, 750 ms ease-in-out —
  * to a navy back with the offerings and the link to the solution page.
  * Hover (mouse) or tap / "View offerings" flips it; the back has a turn-back
  * button and Escape.
  */
+import { Image } from 'astro:assets';
 import Button from '@/components/ui/Button.astro';
 import CheckList from '@/components/ui/CheckList.astro';
 import Eyebrow from '@/components/ui/Eyebrow.astro';
 import Icon from '@/components/ui/Icon.astro';
 import Section from '@/components/ui/Section.astro';
-import { getContent } from '@/data';
+import { findSolution, getContent } from '@/data';
+import { SOLUTION_BLOCK_PHOTOS } from '@/data/media';
+import DarkBackdrop from '@/components/sections/shared/DarkBackdrop.astro';
 
-const { home, solutions: cards, ui, R } = getContent(Astro.url);
+const { home, solutions: all, ui, R } = getContent(Astro.url);
 const { solutions } = home;
+const cards = all.filter((s) => s.slug !== 'josoorkom');
+const josoorkom = findSolution(all, 'josoorkom');
 ---
 
 <Section id="solutions" tone="blue" labelledby="solutions-title">
@@ -62,6 +66,19 @@ const { solutions } = home;
       ))
     }
   </ul>
+
+  <div class="hs__banner" data-tone="dark" data-reveal>
+    <DarkBackdrop arcs={false} />
+    <div class="hs__banner-photo" aria-hidden="true">
+      <Image src={SOLUTION_BLOCK_PHOTOS.josoorkom} alt="" widths={[640, 960, 1280, 1672]} sizes="(min-width: 1000px) 640px, 100vw" quality={85} />
+    </div>
+    <div class="hs__banner-copy">
+      <span class="hs__banner-pill"><Icon name="graduation-cap" size={16} strokeWidth={2} />{josoorkom.name}</span>
+      <h3 class="hs__banner-title">{josoorkom.overviewCard.title}</h3>
+      <p class="hs__banner-text">{josoorkom.overviewCard.text}</p>
+      <Button href={R.solution('josoorkom')} variant="gold" size="lg">{josoorkom.overviewCard.cta}</Button>
+    </div>
+  </div>
 </Section>
 
 <script>
@@ -237,18 +254,56 @@ const { solutions } = home;
     :global(html:not(.js)) .flip:hover .flip__back { transform: none; }
   }
 
-
-  /* An odd card out on the last row sits in the middle. */
-  @media (min-width: 1024px) {
-    .hs__grid > .flip:last-child:nth-child(3n + 1) { grid-column: 2; }
+  /* Josoorkom banner ------------------------------------------------------------- */
+  .hs__banner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+    margin-top: 24px;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(100deg, var(--color-navy-900) 0%, var(--color-navy-800) 100%);
+    box-shadow: var(--shadow-md);
   }
+  .hs__banner-copy { position: relative; padding: clamp(28px, 4vw, 48px); }
+  .hs__banner-photo { position: relative; grid-column: 2; grid-row: 1; min-height: 260px; }
+  .hs__banner-photo :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hs__banner-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--color-navy-800) 0%, rgb(25 63 115 / 0.3) 45%, transparent 100%);
+  }
+  :global([dir='rtl']) .hs__banner-photo::after { background: linear-gradient(270deg, var(--color-navy-800) 0%, rgb(25 63 115 / 0.3) 45%, transparent 100%); }
+  .hs__banner-copy { grid-column: 1; grid-row: 1; }
+  .hs__banner-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--color-gold-500);
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--color-navy-950);
+  }
+  .hs__banner-title { margin-top: 18px; font-size: clamp(1.5rem, 1.2rem + 1vw, 2.1rem); color: #fff; }
+  .hs__banner-text { margin: 12px 0 26px; max-width: 56ch; font-size: var(--fs-body); line-height: 1.7; color: var(--color-blue-300); }
+
   @media (max-width: 1023px) {
     .hs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .hs__grid > .flip:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc(50% - 12px); }
+  }
+  @media (max-width: 767px) {
+    .hs__banner { grid-template-columns: minmax(0, 1fr); }
+    .hs__banner-photo { grid-column: 1; grid-row: 1; min-height: 200px; }
+    .hs__banner-photo::after,
+    :global([dir='rtl']) .hs__banner-photo::after { background: linear-gradient(0deg, var(--color-navy-900) 0%, transparent 70%); }
+    .hs__banner-copy { grid-row: 2; padding-top: 8px; }
   }
   @media (max-width: 639px) {
     .hs__grid { grid-template-columns: minmax(0, 1fr); }
-    .hs__grid > .flip:last-child:nth-child(odd) { width: auto; justify-self: stretch; }
     .flip__inner { min-height: 300px; }
   }
 </style>

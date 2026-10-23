@@ -1,0 +1,67 @@
+---
+/** About › Our Mission & Our Vision: white mission card, navy vision card. */
+import IconTile from '@/components/ui/IconTile.astro';
+import Section from '@/components/ui/Section.astro';
+import { getContent } from '@/data';
+
+const { mission, vision, missionVisionTitle } = getContent(Astro.url).about;
+---
+
+<Section tone="page" labelledby="mv-title">
+  <h2 id="mv-title" class="mv__title" data-reveal>{missionVisionTitle}</h2>
+  <div class="mv" data-reveal-group="up">
+    <article class="mv__card mv__card--mission">
+      <span class="mv__corner" aria-hidden="true"></span>
+      <IconTile icon="flag" variant="navy" size="lg" />
+      <h3 class="mv__card-title">{mission.title}</h3>
+      <p class="mv__quote">{mission.text}</p>
+    </article>
+    <article class="mv__card mv__card--vision" data-tone="dark">
+      <span class="mv__corner" aria-hidden="true"></span>
+      <IconTile icon="eye" variant="gold" size="lg" />
+      <h3 class="mv__card-title">{vision.title}</h3>
+      <p class="mv__quote">{vision.text}</p>
+    </article>
+  </div>
+</Section>
+
+<style>
+  .mv__title { text-align: center; color: var(--color-navy-950); }
+  .mv {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px;
+    margin-top: 48px;
+  }
+  .mv__card {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(28px, 3.5vw, 44px);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+  }
+  .mv__card--mission { border: 1px solid var(--border); background: #fff; }
+  .mv__card--vision { background: linear-gradient(150deg, var(--color-navy-700) 0%, var(--color-navy-900) 100%); }
+  .mv__corner {
+    position: absolute;
+    inset-inline-end: 0;
+    top: 0;
+    width: 28%;
+    height: 45%;
+    border-end-start-radius: var(--radius-xl);
+    background: #fff4e8;
+  }
+  .mv__card--vision .mv__corner { background: rgb(255 255 255 / 0.1); }
+  .mv__card :global(.tile) { position: relative; }
+  .mv__card-title { position: relative; margin-top: 24px; font-size: clamp(1.6rem, 1.35rem + 0.9vw, 2rem); color: var(--color-navy-950); }
+  .mv__card--vision .mv__card-title { color: #fff; }
+  .mv__quote { position: relative; margin-top: 16px; font-size: var(--fs-lead); line-height: 1.7; color: var(--color-ink); quotes: '\201C' '\201D'; }
+  .mv__quote:lang(ar) { quotes: '\00AB' '\00BB'; }
+  .mv__card--vision .mv__quote { color: #e7eefb; }
+  .mv__quote::before { content: open-quote; }
+  .mv__quote::after { content: close-quote; }
+
+  @media (max-width: 767px) {
+    .mv { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+/** Home › Industries We Serve: centred heading, five sector cards. */
+import IconTile from '@/components/ui/IconTile.astro';
+import Section from '@/components/ui/Section.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import { getContent } from '@/data';
+
+const { industries } = getContent(Astro.url).home;
+---
+
+<Section id="industries" tone="page" labelledby="industries-title">
+  <SectionHeading
+    eyebrow={industries.eyebrow}
+    title={industries.title}
+    text={industries.text}
+    id="industries-title"
+    align="center"
+    width="narrow"
+  />
+  <ul class="ind" data-reveal-group="up">
+    {
+      industries.sectors.map((sector) => (
+        <li class="ind__card">
+          <IconTile icon={sector.icon} variant="white-orange" size="lg" />
+          <h3 class="ind__title">{sector.label}</h3>
+        </li>
+      ))
+    }
+  </ul>
+</Section>
+
+<style>
+  .ind {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 18px;
+    margin: 48px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ind__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 30px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, #fff, var(--color-blue-100));
+    text-align: center;
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.35s var(--ease);
+  }
+  .ind__card:hover { transform: translateY(-4px); border-color: var(--color-blue-200); box-shadow: var(--shadow-md); }
+  .ind__title { font-size: 1.05rem; line-height: 1.4; color: var(--color-navy-950); }
+
+  @media (max-width: 1023px) {
+    .ind { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 599px) {
+    .ind { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ind__card:last-child { grid-column: span 2; }
+  }
+</style>

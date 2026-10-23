@@ -1,0 +1,177 @@
+---
+/**
+ * Enquiry form — fields from content doc §12 (Full Name, Company Name, Email
+ * Address, Phone Number, Solution of Interest, Message; "Submit Enquiry").
+ *
+ * - `solution` preselects "Solution of Interest" (also read from ?solution=)
+ * - inline validation with accessible error messages (scripts/forms.ts)
+ * - POSTs FormData to Web3Forms (PUBLIC_WEB3FORMS_ACCESS_KEY) or to
+ *   PUBLIC_FORM_ENDPOINT when set (lib/form-endpoint.ts); otherwise opens the
+ *   visitor's email app addressed to info@gulfasco.com, prefilled
+ * - honeypot field for basic spam protection
+ * The script handles every [data-enquiry-form] on the page.
+ */
+import Button from '@/components/ui/Button.astro';
+import FormField from '@/components/ui/FormField.astro';
+import { fill, getContent } from '@/data';
+import { SITE } from '@/data/site';
+import { FORM_ENDPOINT, WEB3FORMS_KEY } from '@/lib/form-endpoint';
+import type { SolutionSlug } from '@/data/types';
+
+interface Props {
+  /** Unique prefix for field ids when a page has more than one form. */
+  id?: string;
+  solution?: SolutionSlug;
+  /** Show the field icons (Contact page). */
+  icons?: boolean;
+  class?: string;
+}
+
+const { id = 'enquiry-form', solution, icons = false, class: className } = Astro.props;
+const { brand, contact, solutions, ui } = getContent(Astro.url);
+const { fields, submit } = contact.form;
+const endpoint = FORM_ENDPOINT;
+const options = solutions.map((s) => ({ value: s.slug, label: s.name }));
+const f = (name: string) => `${id}-${name}`;
+const email = SITE.contact.email;
+---
+
+<form
+  class:list={['ef', className]}
+  id={id}
+  method="post"
+  action={endpoint || `mailto:${email}`}
+  enctype={endpoint ? undefined : 'text/plain'}
+  data-enquiry-form
+  data-endpoint={endpoint}
+  data-email={email}
+  data-preselect={solution}
+  data-msg-required={ui.form.required}
+  data-msg-email={ui.form.email}
+  data-msg-phone={ui.form.phone}
+  data-msg-check={ui.form.checkFields}
+  data-msg-sending={ui.form.sending}
+  data-msg-success={ui.form.success}
+  data-msg-error={fill(ui.form.error, { email })}
+  data-msg-mailto={fill(ui.form.mailto, { email })}
+  data-subject={ui.form.subject}
+  data-labels={JSON.stringify(fields)}
+  novalidate
+>
+  <div class="ef__grid">
+    <FormField id={f('name')} name="fullName" label={fields.fullName} required autocomplete="name" maxlength={120} icon={icons ? 'user' : undefined} />
+    <FormField id={f('company')} name="company" label={fields.company} autocomplete="organization" maxlength={160} icon={icons ? 'building-2' : undefined} />
+    <FormField id={f('email')} name="email" type="email" label={fields.email} required autocomplete="email" inputmode="email" maxlength={160} icon={icons ? 'at-sign' : undefined} />
+    <FormField id={f('phone')} name="phone" type="tel" label={fields.phone} autocomplete="tel" inputmode="tel" maxlength={32} icon={icons ? 'phone' : undefined} prefix="+966" />
+    <FormField id={f('solution')} name="solution" type="select" label={fields.solution} options={options} class="ef__full" />
+    <FormField id={f('message')} name="message" type="textarea" label={fields.message} required rows={4} maxlength={4000} class="ef__full" />
+  </div>
+
+  {
+    WEB3FORMS_KEY && (
+      <>
+        <input type="hidden" name="access_key" value={WEB3FORMS_KEY} />
+        <input type="hidden" name="from_name" value={`${brand.shortName} Website`} />
+        <input type="hidden" name="subject" value={ui.form.subject} />
+      </>
+    )
+  }
+
+  <div class="ef__trap" aria-hidden="true">
+    <label for={f('website')}>Website</label>
+    <input id={f('website')} name="website" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="ef__footer">
+    <Button type="submit" size="lg" icon="send" data-submit>{submit}</Button>
+    <p class="ef__status" role="status" aria-live="polite" data-status></p>
+  </div>
+</form>
+
+<script>
+  import { setupValidation, withCountryCode } from '@/scripts/forms';
+
+  document.querySelectorAll<HTMLFormElement>('[data-enquiry-form]').forEach((form) => {
+    const d = form.dataset;
+    const endpoint = d.endpoint ?? '';
+    const email = d.email ?? '';
+    const labels = JSON.parse(d.labels ?? '{}') as Record<string, string>;
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const submitBtn = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const select = form.querySelector<HTMLSelectElement>('select[name="solution"]');
+    const validation = setupValidation(form);
+
+    // Preselect from the page (data-preselect) or the URL (?solution=medical).
+    const wanted = new URLSearchParams(window.location.search).get('solution') || d.preselect;
+    if (select && wanted && [...select.options].some((o) => o.value === wanted)) select.value = wanted;
+
+    const showStatus = (kind: 'success' | 'error' | 'info', text: string) => {
+      status.dataset.kind = kind;
+      status.textContent = text;
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (validation.validateAll().length) {
+        showStatus('error', d.msgCheck ?? '');
+        return;
+      }
+
+      const data = new FormData(form);
+      if (String(data.get('website') ?? '').trim()) return; // bot
+      data.delete('website');
+      data.set('phone', withCountryCode(String(data.get('phone') ?? '').trim()));
+      const solutionLabel = select?.value ? select.selectedOptions[0].text : '';
+      if (solutionLabel) data.set('solution', solutionLabel);
+      const subject = `${d.subject}${solutionLabel ? ` – ${solutionLabel}` : ''}`;
+
+      if (!endpoint) {
+        // No backend configured: hand the enquiry to the visitor's email app.
+        const lines = [
+          `${labels.fullName}: ${data.get('fullName')}`,
+          `${labels.company}: ${data.get('company') || '-'}`,
+          `${labels.email}: ${data.get('email')}`,
+          `${labels.phone}: ${data.get('phone') || '-'}`,
+          `${labels.solution}: ${solutionLabel || '-'}`,
+          '',
+          String(data.get('message')),
+        ];
+        window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`;
+        showStatus('info', d.msgMailto ?? '');
+        return;
+      }
+
+      if (data.has('subject')) data.set('subject', subject);
+      submitBtn.disabled = true;
+      submitBtn.setAttribute('aria-disabled', 'true');
+      showStatus('info', d.msgSending ?? '');
+      try {
+        const response = await fetch(endpoint, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        form.reset();
+        showStatus('success', d.msgSuccess ?? '');
+      } catch {
+        showStatus('error', d.msgError ?? '');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.removeAttribute('aria-disabled');
+      }
+    });
+  });
+</script>
+
+<style>
+  .ef__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .ef__grid :global(.ef__full) { grid-column: 1 / -1; }
+  .ef__trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .ef__footer { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; margin-top: 26px; }
+  .ef__status { font-size: var(--fs-small); font-weight: 600; color: var(--color-ink); }
+  .ef__status:empty { display: none; }
+  .ef__status[data-kind='success'] { color: #047857; }
+  .ef__status[data-kind='error'] { color: #be123c; }
+
+  @media (max-width: 599px) {
+    .ef__grid { grid-template-columns: minmax(0, 1fr); }
+    .ef__footer :global(.btn) { width: 100%; }
+  }
+</style>

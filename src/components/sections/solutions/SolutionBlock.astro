@@ -1,0 +1,134 @@
+---
+/**
+ * One solution area on the Solutions page: numbered badge, title,
+ * description, check list of its offerings and CTA on one side; photo and an
+ * info card (the solution page's overview + enquiry link) on the other.
+ * Blocks alternate sides. For Josoorkom the info-card link is "Visit
+ * Josoorkom", which opens the sign-up dialog before going to the platform.
+ */
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import CheckList from '@/components/ui/CheckList.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Photo from '@/components/ui/Photo.astro';
+import { getContent } from '@/data';
+import { SOLUTION_BLOCK_PHOTOS } from '@/data/media';
+import type { Solution } from '@/data/types';
+
+interface Props {
+  solution: Solution;
+  index: number;
+}
+
+const { solution: s, index } = Astro.props;
+const { R, ui } = getContent(Astro.url);
+const reverse = index % 2 === 1;
+const isJosoorkom = s.slug === 'josoorkom';
+const tone = isJosoorkom ? 'gold' : index % 2 === 0 ? 'orange' : 'blue';
+const link = s.page.finalCta.cta;
+---
+
+<article class:list={['sb', { 'sb--reverse': reverse, 'sb--feature': isJosoorkom }]} id={`area-${s.slug}`} aria-labelledby={`area-${s.slug}-title`} data-reveal>
+  <div class="sb__copy">
+    <Badge tone={tone}>{`${String(index + 1).padStart(2, '0')} — ${s.shortName}`}</Badge>
+    <h2 id={`area-${s.slug}-title`} class="sb__title">{s.overviewCard.title}</h2>
+    <p class="sb__text">{s.overviewCard.text}</p>
+    <div class="sb__box">
+      <CheckList items={s.page.items.map((i) => i.title)} columns={2} strong />
+    </div>
+    <Button href={R.solution(s.slug)} variant={isJosoorkom ? 'gold' : 'navy'}>{s.overviewCard.cta}</Button>
+  </div>
+
+  <div class="sb__media">
+    <Photo src={SOLUTION_BLOCK_PHOTOS[s.slug]} alt={s.name} ratio="auto" overlay="bottom" radius="lg" class="sb__photo" sizes="(min-width: 1000px) 720px, (min-width: 560px) 95vw, 100vw">
+      <span class="sb__photo-icon" aria-hidden="true"><Icon name={s.icon} size={22} strokeWidth={1.8} /></span>
+    </Photo>
+    <div class="sb__info">
+      <p class="sb__info-label">{s.page.overview.eyebrow}</p>
+      <h3 class="sb__info-title">{s.page.overview.title}</h3>
+      <p class="sb__info-text">{s.page.overview.text}</p>
+      <a href={link.href} class:list={['sb__info-link', { 'sb__info-link--gold': isJosoorkom }]} target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
+        <span>{link.label}</span>
+        <Icon name={link.external ? 'square-arrow-out-up-right' : 'arrow-right'} size={18} strokeWidth={2} class="icon-dir" />
+        {link.external && <span class="visually-hidden">{ui.newTab}</span>}
+      </a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .sb {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: center;
+    gap: clamp(24px, 3.5vw, 48px);
+    padding: clamp(24px, 3.5vw, 40px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    scroll-margin-top: calc(var(--header-h) + 20px);
+  }
+  .sb--feature { border-color: rgb(248 184 77 / 0.5); box-shadow: 0 0 0 4px rgb(248 184 77 / 0.12), var(--shadow-sm); }
+  .sb--reverse .sb__copy { order: 2; }
+  .sb__title { margin-top: 16px; font-size: clamp(1.6rem, 1.25rem + 1.1vw, 2.2rem); color: var(--color-navy-950); }
+  .sb__text { margin-top: 14px; font-size: var(--fs-body); line-height: 1.75; color: var(--color-ink); }
+  .sb__box { margin: 22px 0 26px; padding: 18px 20px; border-radius: var(--radius-md); background: var(--color-blue-100); }
+  .sb__box :global(.checks li) { font-size: 0.95rem; }
+
+  .sb__media { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
+  .sb__media :global(.sb__photo) { min-height: 320px; height: 100%; }
+  .sb__photo-icon {
+    position: absolute;
+    inset-inline-start: 14px;
+    bottom: 14px;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--color-gold-500);
+    color: var(--color-navy-950);
+  }
+  .sb__info {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-radius: var(--radius-lg);
+    background: var(--color-blue-100);
+  }
+  .sb__info-label { font-family: var(--font-display); font-size: var(--fs-2xs); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-orange-600); }
+  .sb__info-title { margin-top: 10px; font-size: 1.1rem; color: var(--color-navy-950); }
+  .sb__info-text { margin-top: 10px; font-size: var(--fs-xs); line-height: 1.7; color: var(--color-ink); }
+  .sb__info-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: auto;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: #fff;
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--color-navy-950);
+    box-shadow: var(--shadow-xs);
+    transition: color 0.2s, background-color 0.2s;
+  }
+  .sb__info-text + .sb__info-link { margin-top: 18px; }
+  .sb__info-link :global(svg) { flex: none; color: var(--color-orange-600); }
+  .sb__info-link:hover { color: var(--color-orange-600); }
+  .sb__info-link--gold { background: var(--color-navy-900); color: #fff; }
+  .sb__info-link--gold :global(svg) { color: var(--color-gold-500); }
+  .sb__info-link--gold:hover { background: var(--color-navy-800); color: var(--color-gold-400); }
+
+  @media (max-width: 999px) {
+    .sb { grid-template-columns: minmax(0, 1fr); }
+    .sb--reverse .sb__copy { order: 0; }
+  }
+  @media (max-width: 559px) {
+    .sb__media { grid-template-columns: minmax(0, 1fr); }
+    .sb__media :global(.sb__photo) { min-height: 220px; }
+  }
+</style>

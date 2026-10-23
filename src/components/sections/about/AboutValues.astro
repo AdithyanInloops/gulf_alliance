@@ -1,0 +1,60 @@
+---
+/** About › Our Core Values (as designed): 4 + 3 grid of numbered white cards. */
+import IconTile from '@/components/ui/IconTile.astro';
+import Section from '@/components/ui/Section.astro';
+import { getContent } from '@/data';
+
+const { values } = getContent(Astro.url).about;
+---
+
+<Section id="values" tone="blue" labelledby="values-title">
+  <h2 id="values-title" class="values__title" data-reveal>{values.title}</h2>
+  <ul class="values" data-reveal-group="up">
+    {
+      values.items.map((v, i) => (
+        <li class="values__card">
+          <IconTile icon={v.icon} variant="light" size="sm" />
+          <h3 class="values__name">
+            <span class="values__num">{String(i + 1).padStart(2, '0')}</span>
+            {v.title}
+          </h3>
+          <p class="values__text">{v.text}</p>
+        </li>
+      ))
+    }
+  </ul>
+</Section>
+
+<style>
+  .values__title { text-align: center; color: var(--color-navy-950); }
+  .values {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin: 48px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .values__card {
+    padding: 26px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    box-shadow: var(--shadow-xs);
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  }
+  .values__card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .values__card:last-child { grid-column: span 2; }
+  .values__name { display: flex; align-items: baseline; gap: 8px; margin-top: 18px; font-size: 1.2rem; color: var(--color-navy-950); }
+  .values__num { font-family: var(--font-display); font-size: var(--fs-2xs); font-weight: 700; color: var(--color-orange-600); }
+  .values__text { margin-top: 12px; font-size: var(--fs-small); line-height: 1.7; color: var(--color-ink); }
+
+  @media (max-width: 1023px) {
+    .values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .values__card:last-child { grid-column: span 2; }
+  }
+  @media (max-width: 599px) {
+    .values { grid-template-columns: minmax(0, 1fr); }
+    .values__card:last-child { grid-column: auto; }
+  }
+</style>

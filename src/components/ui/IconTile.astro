@@ -1,0 +1,45 @@
+---
+/**
+ * Square icon tile used on cards (rounded 8px, as designed).
+ *   light         light-blue tile, navy icon
+ *   light-orange  light-blue tile, orange icon
+ *   white-orange  white tile, orange icon
+ *   navy          navy tile, gold icon
+ *   gold          gold tile, navy icon
+ */
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+interface Props {
+  icon: IconName;
+  variant?: 'light' | 'light-orange' | 'white-orange' | 'navy' | 'gold';
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const { icon, variant = 'light', size = 'md', class: className } = Astro.props;
+const iconSize = { sm: 18, md: 22, lg: 26 }[size];
+---
+
+<span class:list={['tile', `tile--${variant}`, `tile--${size}`, className]} aria-hidden="true">
+  <Icon name={icon} size={iconSize} strokeWidth={1.8} />
+</span>
+
+<style>
+  .tile {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+  }
+  .tile--sm { width: 38px; height: 38px; border-radius: 7px; }
+  .tile--lg { width: 56px; height: 56px; border-radius: 10px; }
+
+  .tile--light { background: var(--color-blue-200); color: var(--color-navy-950); }
+  .tile--light-orange { background: var(--color-blue-200); color: var(--color-orange-600); }
+  .tile--white-orange { background: #fff; color: var(--color-orange-600); box-shadow: var(--shadow-xs); }
+  .tile--navy { background: var(--color-navy-950); color: var(--color-gold-500); }
+  .tile--gold { background: var(--color-gold-500); color: var(--color-navy-950); }
+</style>

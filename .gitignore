@@ -1,0 +1,29 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# environment variables (secrets) — .env.example documents them
+.env
+.env.*
+!.env.example
+
+# Vercel CLI link
+.vercel/
+
+# raw client photos as received; the optimised copies the site uses are in src/assets/photos
+src/uploads/
+
+# editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

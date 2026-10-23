@@ -1,0 +1,195 @@
+---
+/**
+ * Solution page closing section: final CTA copy, buttons and a
+ * contact strip on the left; the enquiry form (solution preselected) — or,
+ * for Josoorkom, a contact card — on the right.
+ *   tone="navy"  dark section (most pages)   tone="light"  light-blue section
+ */
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import IconTile from '@/components/ui/IconTile.astro';
+import { getContent } from '@/data';
+import { SITE } from '@/data/site';
+import type { ContactItem, Solution } from '@/data/types';
+import DarkBackdrop from '@/components/sections/shared/DarkBackdrop.astro';
+import EnquiryForm from '@/components/sections/shared/EnquiryForm.astro';
+
+interface Props {
+  solution: Solution;
+  tone?: 'navy' | 'light';
+  /** Show the contact card instead of the form. */
+  contactCard?: boolean;
+}
+
+const { solution, tone = 'navy', contactCard = false } = Astro.props;
+const { finalCta } = solution.page;
+const { contact, brand, ui, R } = getContent(Astro.url);
+const { info, form } = contact;
+const item = (key: ContactItem['key']) => info.items.find((i) => i.key === key)!;
+const dark = tone === 'navy';
+---
+
+<section
+  class:list={['sc', `sc--${tone}`]}
+  id="enquire"
+  data-tone={dark ? 'dark' : undefined}
+  aria-labelledby="solution-cta-title"
+>
+  {dark && <DarkBackdrop />}
+  <div class="container sc__inner">
+    <div class="sc__copy" data-reveal>
+      <h2 id="solution-cta-title" class="sc__title">{finalCta.title}</h2>
+      <p class="sc__text">{finalCta.text}</p>
+      <div class="sc__actions">
+        <Button href={contactCard ? finalCta.cta.href : '#enquiry-form'} external={finalCta.cta.external} variant="gold" size="lg" icon={finalCta.cta.external ? 'square-arrow-out-up-right' : 'send'}>
+          {finalCta.cta.label}
+        </Button>
+        <a href={SITE.contact.phoneHref} class="sc__phone"><Icon name="phone" size={20} /><span class="ltr">{SITE.contact.phoneDisplay}</span></a>
+      </div>
+      <div class="sc__strip">
+        <div class="sc__strip-item">
+          <IconTile icon="mail" variant={dark ? 'navy' : 'light-orange'} size="sm" />
+          <div>
+            <p class="sc__strip-label">{item('email').label}</p>
+            <a href={SITE.contact.emailHref} class="sc__strip-value"><span class="ltr">{SITE.contact.email}</span></a>
+          </div>
+        </div>
+        <div class="sc__strip-item">
+          <IconTile icon="map-pin" variant={dark ? 'navy' : 'light-orange'} size="sm" />
+          <div>
+            <p class="sc__strip-label">{item('address').label}</p>
+            <p class="sc__strip-value">{brand.address}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {
+      contactCard ? (
+        <div class="sc__card sc__card--contact" data-reveal>
+          <h3 class="sc__card-title">{info.title}</h3>
+          <p class="sc__card-text">{info.text}</p>
+          <ul class="sc__rows">
+            {info.items.map((row) => (
+              <li>
+                <IconTile icon={row.icon} variant="navy" size="sm" />
+                <div>
+                  <p class="sc__row-label">{row.label}</p>
+                  <a href={row.href} class="sc__row-value">{row.key === 'address' ? row.value : <span class="ltr">{row.value}</span>}</a>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <a href={R.contact} class="sc__card-link">
+            {ui.contactUs} <Icon name="arrow-right" size={16} strokeWidth={2} class="icon-dir" />
+          </a>
+        </div>
+      ) : (
+        <div class="sc__card" data-reveal>
+          <h3 class="sc__card-title">{form.title}</h3>
+          <p class="sc__card-text">{form.text}</p>
+          <EnquiryForm solution={solution.slug} />
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .sc {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: clamp(64px, 7vw, 96px);
+    scroll-margin-top: var(--header-h);
+  }
+  .sc--navy { background: linear-gradient(160deg, var(--color-navy-800) 0%, var(--color-navy-900) 55%, var(--color-navy-950) 100%); }
+  .sc--light { background: var(--color-blue-150); }
+  .sc__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+    align-items: center;
+    gap: clamp(32px, 5vw, 56px);
+  }
+  .sc__title { font-size: clamp(2rem, 1.4rem + 1.8vw, 2.75rem); }
+  .sc--navy .sc__title { color: #fff; }
+  .sc--light .sc__title { color: var(--color-navy-950); }
+  .sc__text { margin-top: 20px; font-size: var(--fs-lead); line-height: 1.6; color: var(--body); }
+  .sc__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; margin-top: 30px; }
+  .sc__phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .sc__phone :global(svg) { color: var(--color-gold-500); }
+  .sc--light .sc__phone :global(svg) { color: var(--color-orange-600); }
+
+  .sc__strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 32px;
+    padding: 20px;
+    border-radius: var(--radius-lg);
+  }
+  .sc--navy .sc__strip { background: rgb(255 255 255 / 0.08); border: 1px solid rgb(255 255 255 / 0.12); }
+  .sc--light .sc__strip { background: #fff; box-shadow: var(--shadow-xs); }
+  .sc__strip-item { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+  .sc__strip-label {
+    font-family: var(--font-display);
+    font-size: var(--fs-2xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .sc__strip-value { display: block; margin-top: 2px; font-size: var(--fs-small); line-height: 1.5; color: var(--body); overflow-wrap: anywhere; }
+  .sc--navy .sc__strip :global(.tile--navy) { background: var(--color-navy-900); }
+
+  .sc__card {
+    padding: clamp(24px, 3vw, 32px);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    box-shadow: var(--shadow-lg);
+    color: var(--color-ink);
+    --text: var(--color-navy-950);
+    --body: var(--color-ink);
+    --border: #e3e9f5;
+  }
+  .sc__card-title { font-size: 1.6rem; color: var(--color-navy-950); }
+  .sc__card-text { margin: 8px 0 22px; font-size: var(--fs-small); line-height: 1.55; color: var(--color-ink); }
+
+  .sc__card--contact {
+    background: var(--color-navy-700);
+    color: var(--color-blue-300);
+    --text: #fff;
+    --body: var(--color-blue-300);
+  }
+  .sc__card--contact .sc__card-title { color: #fff; font-size: 1.35rem; }
+  .sc__card--contact .sc__card-text { color: var(--color-blue-300); }
+  .sc__rows { display: grid; gap: 12px; margin: 0; padding: 16px; list-style: none; border-radius: var(--radius-md); background: var(--color-navy-900); }
+  .sc__rows li { display: flex; align-items: flex-start; gap: 12px; }
+  .sc__rows :global(.tile--navy) { background: var(--color-navy-700); }
+  .sc__row-label { font-family: var(--font-display); font-size: var(--fs-2xs); font-weight: 700; color: #fff; }
+  .sc__row-value { display: block; margin-top: 2px; font-size: var(--fs-small); color: var(--color-blue-300); overflow-wrap: anywhere; }
+  .sc__card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 20px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--color-gold-500);
+  }
+
+  @media (max-width: 999px) {
+    .sc__inner { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 599px) {
+    .sc__strip { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

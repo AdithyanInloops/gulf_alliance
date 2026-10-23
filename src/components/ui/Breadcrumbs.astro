@@ -1,0 +1,101 @@
+---
+/**
+ * Light breadcrumb bar under the header (solution pages) + BreadcrumbList
+ * structured data. "Home" is added to the structured data automatically.
+ */
+import { getContent } from '@/data';
+import Icon from './Icon.astro';
+
+export interface Crumb {
+  label: string;
+  /** Omit for the current page. */
+  href?: string;
+}
+
+interface Props {
+  items: Crumb[];
+  /** Show as the full-width bar used on solution pages. */
+  bar?: boolean;
+  class?: string;
+}
+
+const { items, bar = false, class: className } = Astro.props;
+const { ui, R } = getContent(Astro.url);
+const siteOrigin = Astro.site ?? Astro.url;
+const trail: Crumb[] = [{ label: ui.breadcrumbHome, href: R.home }, ...items];
+const back = items.find((c) => c.href);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: trail.map((crumb, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: crumb.label,
+    item: new URL(crumb.href ?? Astro.url.pathname, siteOrigin).href,
+  })),
+};
+---
+
+<nav aria-label={ui.breadcrumb} class:list={['crumbs', { 'crumbs--bar': bar }, className]}>
+  <div class:list={{ container: bar }}>
+    <ol>
+      {
+        bar && back ? (
+          <>
+            <li>
+              <a href={back.href} class="crumbs__back">
+                <Icon name="arrow-left" size={17} strokeWidth={2} class="icon-dir" />
+                {back.label}
+              </a>
+            </li>
+            {items
+              .filter((c) => !c.href)
+              .map((c) => (
+                <li>
+                  <span class="crumbs__sep" aria-hidden="true">/</span>
+                  <span aria-current="page">{c.label}</span>
+                </li>
+              ))}
+          </>
+        ) : (
+          trail.map((crumb, i) => (
+            <li>
+              {i > 0 && <span class="crumbs__sep" aria-hidden="true">/</span>}
+              {crumb.href && i < trail.length - 1 ? <a href={crumb.href}>{crumb.label}</a> : <span aria-current="page">{crumb.label}</span>}
+            </li>
+          ))
+        )
+      }
+    </ol>
+  </div>
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+<style>
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--color-navy-950);
+  }
+  .crumbs li { display: inline-flex; align-items: center; gap: 8px; }
+  .crumbs a { display: inline-flex; align-items: center; gap: 6px; color: var(--color-navy-950); }
+  .crumbs a:hover { color: var(--color-orange-600); }
+  .crumbs__sep { color: #a4adbd; font-weight: 400; }
+  [aria-current='page'] { color: var(--muted); }
+
+  .crumbs--bar {
+    margin-top: var(--header-h);
+    padding-block: 12px;
+    background: var(--color-blue-100);
+    border-bottom: 1px solid var(--border);
+  }
+</style>

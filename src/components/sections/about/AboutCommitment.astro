@@ -1,0 +1,42 @@
+---
+/** About › Our Commitment: light panel with the text on one side and the team photo on the other. */
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import Photo from '@/components/ui/Photo.astro';
+import Section from '@/components/ui/Section.astro';
+import { getContent } from '@/data';
+import { PHOTOS } from '@/data/media';
+
+const { about, brand } = getContent(Astro.url);
+const { commitment } = about;
+---
+
+<Section tone="page" labelledby="commitment-title">
+  <div class="cm" data-reveal>
+    <div class="cm__copy">
+      <Eyebrow>{commitment.eyebrow}</Eyebrow>
+      <h2 id="commitment-title">{commitment.title}</h2>
+      <p class="cm__text">{commitment.text}</p>
+    </div>
+    <Photo src={PHOTOS.aboutCommitment} alt={brand.name} ratio="4 / 3" overlay="bottom" radius="lg" class="cm__photo" sizes="(min-width: 1000px) 560px, 100vw" />
+  </div>
+</Section>
+
+<style>
+  .cm {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(28px, 5vw, 64px);
+    padding: clamp(28px, 4vw, 44px);
+    border-radius: var(--radius-xl);
+    background: var(--color-blue-100);
+  }
+  .cm__copy h2 { color: var(--color-navy-950); }
+  .cm__text { margin-top: 18px; font-size: var(--fs-lead); line-height: 1.65; color: var(--color-ink); }
+  .cm :global(.cm__photo) { box-shadow: var(--shadow-md); }
+  .cm :global(.photo--bottom::after) { background: linear-gradient(180deg, transparent 60%, rgb(12 34 68 / 0.4) 100%); }
+
+  @media (max-width: 899px) {
+    .cm { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

@@ -1,0 +1,27 @@
+---
+/** Home — content doc §1. Rendered at / (English) and /ar/ (Arabic). */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import HomeHero from '@/components/sections/home/HomeHero.astro';
+import HomeOverview from '@/components/sections/home/HomeOverview.astro';
+import HomeSolutions from '@/components/sections/home/HomeSolutions.astro';
+import HomeWhy from '@/components/sections/home/HomeWhy.astro';
+import HomeIndustries from '@/components/sections/home/HomeIndustries.astro';
+import CtaBand from '@/components/sections/shared/CtaBand.astro';
+import { getContent } from '@/data';
+import { langPaths } from '@/i18n';
+import { webPageSchema } from '@/lib/schema';
+
+export const getStaticPaths = langPaths;
+
+const { home } = getContent(Astro.url);
+const { seo } = home;
+---
+
+<BaseLayout title={seo.title} description={seo.description} schema={[webPageSchema('WebPage', seo, Astro)]}>
+  <HomeHero />
+  <HomeOverview />
+  <HomeSolutions />
+  <HomeWhy />
+  <HomeIndustries />
+  <CtaBand {...home.finalCta} icon="send" />
+</BaseLayout>

@@ -1,0 +1,144 @@
+---
+/**
+ * Home › Company Overview: the team photo (3:2, so the GULFASCO sign and the
+ * whole group stay in frame) with a caption card over its bottom edge on one side;
+ * eyebrow, title, paragraphs, a two-column list of the solution areas and the
+ * "About Our Company" button on the other.
+ */
+import Button from '@/components/ui/Button.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Photo from '@/components/ui/Photo.astro';
+import Section from '@/components/ui/Section.astro';
+import { getContent } from '@/data';
+import { PHOTOS } from '@/data/media';
+
+const { brand, home, solutions, R } = getContent(Astro.url);
+const { overview } = home;
+const paragraphs = Array.isArray(overview.text) ? overview.text : [overview.text];
+---
+
+<Section id="overview" tone="page" labelledby="overview-title">
+  <div class="ov">
+    <div class="ov__visual" data-reveal>
+      <Photo src={PHOTOS.homeOverview} alt={brand.name} ratio="3 / 2" radius="xl" sizes="(min-width: 1000px) 600px, 100vw" />
+      <div class="ov__caption">
+        <span class="ov__caption-icon"><Icon name="handshake" size={24} strokeWidth={1.8} /></span>
+        <div>
+          <p class="ov__caption-title">{brand.name}</p>
+          <p class="ov__caption-text">{brand.tagline}</p>
+        </div>
+      </div>
+      <span class="ov__dots" aria-hidden="true"></span>
+    </div>
+
+    <div class="ov__content" data-reveal>
+      <Eyebrow>{overview.eyebrow}</Eyebrow>
+      <h2 id="overview-title">{overview.title}</h2>
+      {paragraphs.map((p) => <p class="ov__text">{p}</p>)}
+      <ul class="ov__list">
+        {
+          solutions.map((s) => (
+            <li>
+              <a href={R.solution(s.slug)}>
+                <span class="ov__list-icon"><Icon name={s.icon} size={17} strokeWidth={1.9} /></span>
+                {s.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <Button href={overview.cta.href} variant="navy">{overview.cta.label}</Button>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .ov {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: center;
+    gap: clamp(40px, 6vw, 88px);
+  }
+  .ov__visual { position: relative; padding-bottom: 40px; }
+  .ov__visual :global(.photo) { box-shadow: var(--shadow-lg); }
+  .ov__dots {
+    position: absolute;
+    z-index: -1;
+    inset-inline-start: -28px;
+    top: -28px;
+    width: 140px;
+    height: 140px;
+    background-image: radial-gradient(var(--color-blue-400) 1.5px, transparent 1.5px);
+    background-size: 14px 14px;
+    opacity: 0.6;
+  }
+  .ov__caption {
+    position: absolute;
+    z-index: 1;
+    inset-inline: 28px;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    background: rgb(255 255 255 / 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-md);
+  }
+  .ov__caption-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: var(--color-navy-900);
+    color: var(--color-gold-500);
+  }
+  .ov__caption-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--color-navy-950); }
+  .ov__caption-text { margin-top: 2px; font-size: var(--fs-xs); color: var(--color-ink); }
+
+  .ov__content h2 { color: var(--color-navy-950); }
+  .ov__text { margin-top: 18px; font-size: var(--fs-body); line-height: 1.75; color: var(--color-ink); }
+  .ov__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 20px;
+    margin: 30px 0 34px;
+    padding: 22px 0 0;
+    border-top: 1px solid var(--border);
+    list-style: none;
+  }
+  .ov__list a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-navy-950);
+    transition: color 0.2s;
+  }
+  .ov__list-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--color-blue-150);
+    color: var(--color-orange-600);
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .ov__list a:hover { color: var(--color-orange-600); }
+  .ov__list a:hover .ov__list-icon { background: var(--color-navy-900); color: var(--color-gold-500); }
+
+  @media (max-width: 899px) {
+    .ov { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 479px) {
+    .ov__list { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

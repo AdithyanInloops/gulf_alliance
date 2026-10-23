@@ -1,0 +1,50 @@
+---
+/**
+ * The seven solution pages — content doc §5–§11 (copy in data/<lang>/solutions.ts).
+ * Rendered at /solutions/<slug>/ and /ar/solutions/<slug>/.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/sections/shared/PageHero.astro';
+import SolutionOverview from '@/components/sections/solution/SolutionOverview.astro';
+import SolutionCta from '@/components/sections/solution/SolutionCta.astro';
+import { contentFor, findSolution, getContent } from '@/data';
+import { SOLUTION_HERO_PHOTOS } from '@/data/media';
+import type { SolutionSlug } from '@/data/types';
+import { langPaths } from '@/i18n';
+import { serviceSchema } from '@/lib/schema';
+
+// One page per solution and language. (getStaticPaths runs on its own, so it
+// can only use imports, not other constants from this file.)
+export const getStaticPaths = () =>
+  langPaths().flatMap(({ params }) => contentFor('en').solutions.map((s) => ({ params: { ...params, slug: s.slug } })));
+
+/** Closing section per page: navy with the enquiry form by default. */
+const CTA_STYLE: Partial<Record<SolutionSlug, { tone?: 'navy' | 'light'; contactCard?: boolean }>> = {
+  'low-current': { tone: 'light' },
+  'electric-elevator': { tone: 'light' },
+  josoorkom: { contactCard: true },
+};
+
+const { solutions, nav, R } = getContent(Astro.url);
+const solution = findSolution(solutions, Astro.params.slug as SolutionSlug);
+const { seo, hero, items } = solution.page;
+const solutionsLabel = nav.find((n) => n.megaMenu)?.label ?? '';
+---
+
+<BaseLayout title={seo.title} description={seo.description} schema={[serviceSchema(solution, Astro)]}>
+  <PageHero
+    eyebrow={solution.name}
+    eyebrowVariant="icon"
+    eyebrowIcon={solution.icon}
+    title={hero.title}
+    text={hero.text}
+    ctas={hero.ctas}
+    photo={SOLUTION_HERO_PHOTOS[solution.slug]}
+    photoAlt={solution.name}
+    framed
+    floating={{ icon: items[0].icon, title: items[0].title }}
+    breadcrumbs={[{ label: solutionsLabel, href: R.solutions }, { label: solution.name }]}
+  />
+  <SolutionOverview solution={solution} />
+  <SolutionCta solution={solution} {...CTA_STYLE[solution.slug]} />
+</BaseLayout>

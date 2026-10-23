@@ -1,0 +1,114 @@
+---
+/**
+ * About › Company Overview: one large white panel — heading and text side by
+ * side on top, then a grid of tiles for the solution areas that make up the
+ * portfolio (each links to its page).
+ */
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import Icon from '@/components/ui/Icon.astro';
+import IconTile from '@/components/ui/IconTile.astro';
+import Section from '@/components/ui/Section.astro';
+import { getContent } from '@/data';
+
+const { about, solutions, R } = getContent(Astro.url);
+const { overview } = about;
+---
+
+<Section id="overview" tone="page" labelledby="about-overview-title">
+  <div class="ao" data-reveal>
+    <span class="ao__glow" aria-hidden="true"></span>
+    <div class="ao__head">
+      <div>
+        <Eyebrow variant="pill">{overview.eyebrow}</Eyebrow>
+        <h2 id="about-overview-title">{overview.title}</h2>
+      </div>
+      <p class="ao__text">{overview.text}</p>
+    </div>
+    <ul class="ao__tiles">
+      {
+        solutions.map((s) => (
+          <li>
+            <a href={R.solution(s.slug)} class:list={['ao__tile', { 'ao__tile--gold': s.slug === 'josoorkom' }]}>
+              <span class="ao__tile-top">
+                <IconTile icon={s.icon} variant={s.slug === 'josoorkom' ? 'gold' : 'navy'} size="sm" />
+                <Icon name="arrow-up-right" size={18} strokeWidth={2} class="ao__tile-go icon-dir" />
+              </span>
+              <span class="ao__tile-title">{s.name}</span>
+              <span class="ao__tile-text">{s.summary}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Section>
+
+<style>
+  .ao {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(28px, 4.5vw, 56px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .ao__glow {
+    position: absolute;
+    inset-inline-end: -80px;
+    top: -80px;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(255 227 199 / 0.7), transparent);
+    pointer-events: none;
+  }
+  .ao__head {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: end;
+    gap: 20px clamp(28px, 5vw, 64px);
+    padding-bottom: clamp(28px, 3.5vw, 40px);
+    border-bottom: 1px solid var(--border);
+  }
+  .ao__head h2 { color: var(--color-navy-950); }
+  .ao__text { font-size: var(--fs-lead); line-height: 1.75; color: var(--color-ink); }
+
+  .ao__tiles {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin: clamp(28px, 3.5vw, 40px) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ao__tile {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--color-blue-50);
+    transition: border-color 0.25s, background-color 0.25s, transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  .ao__tile:hover { border-color: var(--color-blue-200); background: #fff; transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .ao__tile--gold { border-color: rgb(248 184 77 / 0.45); background: #fffaf0; }
+  .ao__tile-top { display: flex; align-items: center; justify-content: space-between; }
+  .ao__tile :global(.ao__tile-go) { color: var(--color-blue-400); transition: color 0.25s; }
+  .ao__tile:hover :global(.ao__tile-go) { color: var(--color-orange-600); }
+  .ao__tile-title { margin-top: 16px; font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--color-navy-950); }
+  .ao__tile-text { margin-top: 6px; font-size: var(--fs-xs); line-height: 1.6; color: var(--color-ink); }
+
+  @media (max-width: 1023px) {
+    .ao__tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 767px) {
+    .ao__head { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 479px) {
+    .ao__tiles { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

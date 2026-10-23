@@ -1,0 +1,32 @@
+---
+/** Solutions overview — content doc §3. Rendered at /solutions/ and /ar/solutions/. */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import DarkHero from '@/components/sections/shared/DarkHero.astro';
+import SolutionsIntro from '@/components/sections/solutions/SolutionsIntro.astro';
+import SolutionBlock from '@/components/sections/solutions/SolutionBlock.astro';
+import CtaBand from '@/components/sections/shared/CtaBand.astro';
+import Section from '@/components/ui/Section.astro';
+import { getContent } from '@/data';
+import { langPaths } from '@/i18n';
+import { solutionsListSchema, webPageSchema } from '@/lib/schema';
+
+export const getStaticPaths = langPaths;
+
+const { solutionsPage, solutions } = getContent(Astro.url);
+const { seo, hero } = solutionsPage;
+---
+
+<BaseLayout title={seo.title} description={seo.description} schema={[webPageSchema('CollectionPage', seo, Astro), solutionsListSchema(Astro)]}>
+  <DarkHero title={hero.title} highlight={hero.highlight} text={hero.text} cta={hero.cta} />
+  <SolutionsIntro />
+  <Section tone="blue" class="blocks">
+    <div class="blocks__list">
+      {solutions.map((s, i) => <SolutionBlock solution={s} index={i} />)}
+    </div>
+  </Section>
+  <CtaBand {...solutionsPage.finalCta} />
+</BaseLayout>
+
+<style>
+  .blocks__list { display: grid; gap: 32px; }
+</style>

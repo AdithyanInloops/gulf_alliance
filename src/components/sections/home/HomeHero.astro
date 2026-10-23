@@ -1,0 +1,211 @@
+---
+/**
+ * Home hero — full-bleed photo of the Riyadh skyline with the connected
+ * solution icons, slowly zooming in and out (Ken Burns), under a navy
+ * gradient that keeps the headline readable:
+ * - company-name pill, two-line headline (second line gold), intro, buttons
+ * - a ticker of all solutions scrolling along the bottom edge
+ * The zoom pauses while the hero is off screen; nothing moves with "reduce
+ * motion". The previous "logo orbit" hero is archived in
+ * docs/design-archive/home-hero-logo-orbit.md.
+ */
+import { Image } from 'astro:assets';
+import Button from '@/components/ui/Button.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { getContent } from '@/data';
+import { focusOf, PHOTOS } from '@/data/media';
+
+const { brand, home, solutions, R } = getContent(Astro.url);
+const { hero } = home;
+const [lineA, lineB] = hero.titleLines;
+const focus = focusOf(PHOTOS.homeHero);
+---
+
+<section class="hero" data-tone="dark" aria-labelledby="hero-title" data-hero>
+  <div class="hero__media" aria-hidden="true">
+    <Image
+      src={PHOTOS.homeHero}
+      alt=""
+      widths={[960, 1280, PHOTOS.homeHero.width]}
+      sizes="(min-width: 1000px) 120vw, 200vw"
+      quality={90}
+      loading="eager"
+      fetchpriority="high"
+      class="hero__img"
+      style={focus ? `object-position:${focus}` : undefined}
+    />
+  </div>
+  <div class="hero__shade" aria-hidden="true"></div>
+
+  <div class="container hero__inner">
+    <div class="hero__content">
+      <Eyebrow variant="pill" class="hero__anim">{brand.name}</Eyebrow>
+      <h1 id="hero-title" class="hero__title hero__anim">
+        <span>{lineA}</span> <span class="hero__accent">{lineB}</span>
+      </h1>
+      <p class="hero__text hero__anim">{hero.text}</p>
+      <div class="hero__actions hero__anim">
+        <Button href={hero.ctas[0].href} variant="gold" size="lg">{hero.ctas[0].label}</Button>
+        <Button href={hero.ctas[1].href} variant="navy-soft" size="lg" icon="message-square-text">{hero.ctas[1].label}</Button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="ticker" aria-label={home.solutions.eyebrow}>
+    <div class="ticker__track">
+      {
+        [0, 1].map((copy) => (
+          <ul class="ticker__list" aria-hidden={copy === 1 ? 'true' : undefined}>
+            {solutions.map((s) => (
+              <li>
+                <a href={R.solution(s.slug)} tabindex={copy === 1 ? -1 : undefined}>
+                  <Icon name={s.icon} size={18} strokeWidth={1.8} />
+                  {s.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ))
+      }
+    </div>
+  </nav>
+</section>
+
+<script>
+  // Pause the zoom and ticker while the hero is scrolled out of view.
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  if (hero && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => hero.classList.toggle('is-offscreen', !entry.isIntersecting)).observe(hero);
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: min(100svh, 980px);
+    padding-top: var(--header-h);
+    background: var(--color-navy-900);
+  }
+
+  /* Photo: fades in, then zooms slowly in and out ---------------------------------- */
+  .hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+    animation: hero-reveal 1.6s var(--ease) both;
+  }
+  .hero__media :global(.hero__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform-origin: 62% 40%;
+    animation: hero-zoom 18s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  .hero.is-offscreen .hero__media :global(.hero__img),
+  .hero.is-offscreen .ticker__track { animation-play-state: paused; }
+
+  /* Navy gradient on the text side, plus top/bottom fades. */
+  .hero__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, rgb(12 34 68 / 0.9) 0%, rgb(12 34 68 / 0.74) 32%, rgb(12 34 68 / 0.25) 60%, rgb(12 34 68 / 0) 78%),
+      linear-gradient(180deg, rgb(12 34 68 / 0.35) 0%, transparent 20%, transparent 64%, rgb(12 34 68 / 0.85) 100%);
+  }
+  :global([dir='rtl']) .hero__shade {
+    background:
+      linear-gradient(270deg, rgb(12 34 68 / 0.9) 0%, rgb(12 34 68 / 0.74) 32%, rgb(12 34 68 / 0.25) 60%, rgb(12 34 68 / 0) 78%),
+      linear-gradient(180deg, rgb(12 34 68 / 0.35) 0%, transparent 20%, transparent 64%, rgb(12 34 68 / 0.85) 100%);
+  }
+
+  /* Copy ---------------------------------------------------------------------------- */
+  .hero__inner {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding-block: clamp(48px, 7vw, 96px);
+  }
+  .hero__content { max-width: 660px; text-shadow: 0 2px 24px rgb(0 0 0 / 0.3); }
+  .hero__title { margin-top: 14px; font-size: clamp(2.4rem, 1.4rem + 3.2vw, 4rem); line-height: 1.05; letter-spacing: -0.035em; color: #fff; }
+  .hero__title span { display: block; }
+  .hero__accent {
+    background: linear-gradient(90deg, var(--color-gold-500), var(--color-gold-300));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+  }
+  .hero__text { margin-top: 24px; max-width: 58ch; font-size: var(--fs-lead); line-height: 1.7; color: #e3ecfb; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; text-shadow: none; }
+
+  /* Ticker -------------------------------------------------------------------------- */
+  .ticker {
+    overflow: hidden;
+    padding-block: 16px;
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+    background: rgb(12 34 68 / 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .ticker__track { display: flex; width: max-content; animation: ticker 48s linear infinite; }
+  :global([dir='rtl']) .ticker__track { animation-name: ticker-rtl; }
+  .ticker:hover .ticker__track,
+  .ticker:focus-within .ticker__track { animation-play-state: paused; }
+  .ticker__list { display: flex; margin: 0; padding: 0; list-style: none; }
+  .ticker__list li { display: inline-flex; align-items: center; }
+  .ticker__list a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding-inline: 28px;
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-blue-300);
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+  .ticker__list a:hover { color: #fff; }
+  .ticker__list li::after { content: ''; width: 6px; height: 6px; margin-inline-start: 18px; border-radius: 50%; background: var(--color-gold-500); }
+  .ticker__list :global(svg) { color: var(--color-gold-500); }
+
+  /* Motion -------------------------------------------------------------------------- */
+  .hero :global(.hero__anim) { animation: hero-in 0.9s var(--ease) backwards; }
+  .hero :global(.hero__title) { animation-delay: 0.1s; }
+  .hero__text { animation-delay: 0.2s; }
+  .hero__actions { animation-delay: 0.3s; }
+
+  @keyframes hero-in { from { opacity: 0; transform: translateY(18px); } }
+  @keyframes hero-reveal { from { opacity: 0; } }
+  @keyframes hero-zoom {
+    from { transform: scale(1); }
+    to { transform: scale(1.14) translate3d(-1.2%, 0.6%, 0); }
+  }
+  @keyframes ticker { to { transform: translateX(-50%); } }
+  @keyframes ticker-rtl { to { transform: translateX(50%); } }
+
+  /* Phones: keep the icons and the tower visible on top, copy at the bottom. */
+  @media (max-width: 767px) {
+    .hero { min-height: 100svh; }
+    .hero__media :global(.hero__img) { object-position: 64% 50% !important; transform-origin: 64% 35%; }
+    .hero__shade,
+    :global([dir='rtl']) .hero__shade {
+      background: linear-gradient(180deg, rgb(12 34 68 / 0.2) 0%, rgb(12 34 68 / 0.3) 30%, rgb(12 34 68 / 0.88) 58%, rgb(12 34 68 / 0.96) 100%);
+    }
+    .hero__inner { align-items: flex-end; padding-top: 30vh; padding-bottom: 36px; }
+    .hero__actions :global(.btn) { flex: 1 1 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero__media :global(.hero__img),
+    .ticker__track { animation: none; }
+  }
+</style>

@@ -1,0 +1,62 @@
+---
+/**
+ * Page section wrapper: vertical rhythm, background tone and container.
+ *   page  #f8f9ff   white  #ffffff   blue  #eff4ff   blue-strong  #e4edff
+ *   navy  #07162b (sets data-tone="dark" so text colours flip)
+ */
+interface Props {
+  id?: string;
+  tone?: 'page' | 'white' | 'blue' | 'blue-strong' | 'navy';
+  spacing?: 'default' | 'tight' | 'none';
+  container?: boolean;
+  labelledby?: string;
+  class?: string;
+  style?: string;
+  [attr: `data-${string}`]: string | undefined;
+}
+
+const {
+  id,
+  tone = 'page',
+  spacing = 'default',
+  container = true,
+  labelledby,
+  class: className,
+  style,
+  ...rest
+} = Astro.props;
+---
+
+<section
+  id={id}
+  class:list={['section', `section--${tone}`, `section--${spacing}`, className]}
+  data-tone={tone === 'navy' ? 'dark' : undefined}
+  aria-labelledby={labelledby}
+  style={style}
+  {...rest}
+>
+  {container ? (
+    <div class="container section__inner">
+      <slot />
+    </div>
+  ) : (
+    <slot />
+  )}
+</section>
+
+<style>
+  .section {
+    position: relative;
+    isolation: isolate;
+    padding-block: var(--section-y);
+    scroll-margin-top: var(--header-h);
+  }
+  .section--page { background: var(--color-blue-50); }
+  .section--white { background: #fff; }
+  .section--blue { background: var(--color-blue-100); }
+  .section--blue-strong { background: var(--color-blue-150); }
+  .section--navy { background: var(--color-navy-900); }
+  .section--tight { padding-block: calc(var(--section-y) * 0.65); }
+  .section--none { padding-block: 0; }
+  .section__inner { position: relative; }
+</style>

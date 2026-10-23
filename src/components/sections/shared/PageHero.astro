@@ -1,0 +1,175 @@
+---
+/**
+ * Light page hero (About, solution pages):
+ * eyebrow, h1, intro, buttons on the left; a photo card on the right with an
+ * optional floating info card. Pass `breadcrumbs` to show the light
+ * breadcrumb bar above it (solution pages).
+ */
+import type { ImageMetadata } from 'astro';
+import Breadcrumbs, { type Crumb } from '@/components/ui/Breadcrumbs.astro';
+import Button from '@/components/ui/Button.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import IconTile from '@/components/ui/IconTile.astro';
+import Photo from '@/components/ui/Photo.astro';
+import type { IconName } from '@/components/ui/icons';
+import type { Cta } from '@/data/types';
+
+interface Props {
+  eyebrow: string;
+  eyebrowVariant?: 'pill' | 'icon' | 'line' | 'text';
+  eyebrowIcon?: IconName;
+  title: string;
+  text: string;
+  ctas?: Cta[];
+  photo: ImageMetadata;
+  photoAlt: string;
+  /** White frame around the photo (solution pages). */
+  framed?: boolean;
+  /** Navy tint over the photo (About hero). */
+  tint?: boolean;
+  floating?: { icon: IconName; title: string; label?: string };
+  breadcrumbs?: Crumb[];
+}
+
+const {
+  eyebrow,
+  eyebrowVariant = 'pill',
+  eyebrowIcon,
+  title,
+  text,
+  ctas = [],
+  photo,
+  photoAlt,
+  framed = false,
+  tint = false,
+  floating,
+  breadcrumbs,
+} = Astro.props;
+
+const iconFor = (cta: Cta, i: number): IconName => {
+  if (cta.external) return 'square-arrow-out-up-right';
+  if (cta.href.startsWith('#')) return 'arrow-down';
+  if (i > 0 && /enquiry|contact/.test(cta.href)) return 'message-square-text';
+  return 'arrow-right';
+};
+---
+
+{breadcrumbs && <Breadcrumbs items={breadcrumbs} bar />}
+
+<section class:list={['ph', { 'ph--crumbs': breadcrumbs }]} aria-labelledby="page-title">
+  <div class="ph__glow" aria-hidden="true"></div>
+  <div class="container ph__inner">
+    <div class="ph__content">
+      <Eyebrow variant={eyebrowVariant} icon={eyebrowIcon} class="ph__anim">{eyebrow}</Eyebrow>
+      <h1 id="page-title" class="ph__title ph__anim">{title}</h1>
+      <p class="ph__text ph__anim">{text}</p>
+      {
+        ctas.length > 0 && (
+          <div class="ph__actions ph__anim">
+            {ctas.map((cta, i) => (
+              <Button href={cta.href} external={cta.external} variant={i === 0 ? 'navy' : 'white'} size="lg" icon={iconFor(cta, i)}>
+                {cta.label}
+              </Button>
+            ))}
+          </div>
+        )
+      }
+    </div>
+
+    <div class:list={['ph__visual', 'ph__anim', { 'ph__visual--framed': framed }]}>
+      <Photo src={photo} alt={photoAlt} ratio={framed ? '4 / 3.4' : '16 / 13'} overlay={tint ? 'navy' : 'none'} radius={framed ? 'lg' : 'xl'} eager sizes="(min-width: 1000px) 560px, 100vw" />
+      {
+        floating && (
+          <div class="ph__float">
+            <IconTile icon={floating.icon} variant="light" size="sm" />
+            <div>
+              {floating.label && <p class="ph__float-label">{floating.label}</p>}
+              <p class="ph__float-title">{floating.title}</p>
+            </div>
+          </div>
+        )
+      }
+      {framed && floating && <span class="ph__badge" aria-hidden="true"><IconTile icon={floating.icon} variant="gold" size="sm" /></span>}
+    </div>
+  </div>
+</section>
+
+<style>
+  .ph {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: calc(var(--header-h) + clamp(48px, 6vw, 80px)) 0 clamp(64px, 7vw, 96px);
+    background: linear-gradient(180deg, var(--color-blue-100) 0%, var(--color-blue-50) 100%);
+  }
+  .ph--crumbs { padding-top: clamp(40px, 5vw, 72px); }
+  .ph__glow {
+    position: absolute;
+    z-index: -1;
+    inset-inline-start: 18%;
+    top: 30%;
+    width: 520px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(255 227 199 / 0.6), transparent);
+    filter: blur(30px);
+  }
+  .ph__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(32px, 5vw, 64px);
+  }
+  .ph__title { margin-top: 6px; font-size: var(--fs-h1); color: var(--color-navy-950); }
+  .ph__text { margin-top: 22px; max-width: 58ch; font-size: var(--fs-lead); line-height: 1.7; color: var(--color-ink); }
+  .ph__actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
+
+  .ph__visual { position: relative; }
+  .ph__visual :global(.photo) { box-shadow: var(--shadow-lg); }
+  .ph__visual--framed {
+    padding: 8px;
+    border-radius: calc(var(--radius-lg) + 8px);
+    background: #fff;
+    box-shadow: var(--shadow-md);
+  }
+  .ph__visual--framed :global(.photo) { box-shadow: none; }
+
+  .ph__float {
+    position: absolute;
+    inset-inline-start: -24px;
+    bottom: -26px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 300px;
+    padding: 12px 16px 12px 12px;
+    border-radius: var(--radius-md);
+    background: #fff;
+    box-shadow: var(--shadow-md);
+  }
+  .ph__float-label {
+    font-family: var(--font-display);
+    font-size: var(--fs-2xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-orange-600);
+  }
+  .ph__float-title { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; line-height: 1.3; color: var(--color-navy-950); }
+  .ph__badge { position: absolute; inset-inline-end: 24px; bottom: 24px; }
+
+  .ph :global(.ph__anim) { animation: ph-in 0.9s var(--ease) backwards; }
+  .ph :global(.ph__anim:nth-child(2)) { animation-delay: 0.08s; }
+  .ph :global(.ph__anim:nth-child(3)) { animation-delay: 0.16s; }
+  .ph :global(.ph__anim:nth-child(4)) { animation-delay: 0.24s; }
+  .ph__visual { animation-delay: 0.2s; }
+  @keyframes ph-in {
+    from { opacity: 0; transform: translateY(18px); }
+  }
+
+  @media (max-width: 899px) {
+    .ph__inner { grid-template-columns: minmax(0, 1fr); }
+    .ph__visual { max-width: 560px; margin-bottom: 20px; }
+    .ph__float { inset-inline-start: 12px; bottom: -22px; }
+  }
+</style>

@@ -1,0 +1,323 @@
+/* ==========================================================================
+   Gulf Alliance Solutions Company — design system
+     navy   #0c2244 → #2f5d9a   (text, buttons, dark sections)
+     gold   #f8b84d             (buttons and accents on navy)
+     amber  #a65b05             (eyebrows and accents on light — AA contrast)
+     light blues #f7f9ff / #eef4ff / #e3edff / #d8e6ff
+   Headings, buttons and labels use Plus Jakarta Sans; body copy uses Inter.
+   Arabic pages (html[lang="ar"], dir="rtl") use IBM Plex Sans Arabic.
+
+   1. Tailwind + theme tokens   2. Semantic tokens   3. Base
+   4. Shared classes (container, buttons, helpers)   5. Motion
+   Component-specific styles live in each .astro component's <style>.
+   ========================================================================== */
+
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Inter Variable', Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', 'Plus Jakarta Sans Variable', 'Inter Variable', 'Segoe UI', Tahoma, sans-serif;
+
+  --color-navy-950: #0c2244;
+  --color-navy-900: #10305c;
+  --color-navy-850: #143767;
+  --color-navy-800: #193f73;
+  --color-navy-700: #224d88;
+  --color-navy-600: #2f5d9a;
+
+  --color-gold-300: #fcd99a;
+  --color-gold-400: #fac76d;
+  --color-gold-500: #f8b84d;
+  --color-gold-600: #eea934;
+
+  --color-orange-100: #ffe3c7;
+  --color-orange-600: #a65b05;
+
+  --color-blue-50: #f7f9ff;
+  --color-blue-100: #eef4ff;
+  --color-blue-150: #e3edff;
+  --color-blue-200: #d8e6ff;
+  --color-blue-300: #d6e5fb;
+  --color-blue-400: #b2c3dc;
+
+  --color-ink: #3f4554;
+}
+
+/* 2. Semantic tokens ------------------------------------------------------ */
+:root {
+  --bg: var(--color-blue-50);
+  --surface: #ffffff;
+  --text: var(--color-navy-950);
+  --body: var(--color-ink);
+  --muted: #5b6272;
+  --border: #e1e8f5;
+  --accent: var(--color-orange-600);
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-pill: 999px;
+
+  --shadow-xs: 0 1px 2px rgb(12 34 68 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(12 34 68 / 0.05), 0 8px 24px -12px rgb(12 34 68 / 0.12);
+  --shadow-md: 0 4px 12px -4px rgb(12 34 68 / 0.08), 0 24px 48px -24px rgb(12 34 68 / 0.24);
+  --shadow-lg: 0 32px 64px -32px rgb(12 34 68 / 0.42);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --container: 1240px;
+  --gutter: clamp(18px, 3vw, 32px);
+  --section-y: clamp(72px, 8vw, 116px);
+  --header-h: 84px;
+
+  --fs-display: clamp(2.35rem, 1.45rem + 3vw, 3.9rem);
+  --fs-h1: clamp(2.1rem, 1.45rem + 2.3vw, 3.3rem);
+  --fs-h2: clamp(1.8rem, 1.35rem + 1.5vw, 2.6rem);
+  --fs-h3: clamp(1.15rem, 1.08rem + 0.35vw, 1.4rem);
+  --fs-lead: clamp(1.05rem, 1rem + 0.25vw, 1.2rem);
+  --fs-body: 1.0625rem;
+  --fs-small: 0.9375rem;
+  --fs-xs: 0.8125rem;
+  --fs-2xs: 0.75rem;
+
+  /* 1 in LTR, -1 in RTL: mirrors directional icons (arrows). */
+  --flip: 1;
+
+  color-scheme: light;
+}
+
+/* Arabic: one typeface, no letter-spacing (it breaks joined letters), more leading. */
+html[lang='ar'] {
+  --font-display: var(--font-arabic);
+  --font-sans: var(--font-arabic);
+  --flip: -1;
+  /* Arabic script needs larger small sizes to stay legible (no caps in Arabic). */
+  --fs-xs: 0.875rem;
+  --fs-2xs: 0.8125rem;
+}
+html[lang='ar'] *,
+html[lang='ar'] *::before,
+html[lang='ar'] *::after {
+  letter-spacing: 0 !important;
+}
+
+/* Navy sections: switch text colours for everything inside. */
+[data-tone='dark'] {
+  --text: #ffffff;
+  --body: var(--color-blue-300);
+  --muted: var(--color-blue-400);
+  --border: rgb(255 255 255 / 0.14);
+  --accent: var(--color-gold-500);
+  color: var(--body);
+}
+
+/* 3. Base ------------------------------------------------------------------ */
+@layer base {
+  html {
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--header-h) + 16px);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--fs-body);
+    line-height: 1.65;
+    color: var(--body);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+  html[lang='ar'] body { line-height: 1.85; }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    text-wrap: balance;
+  }
+  h1 { font-size: var(--fs-h1); font-weight: 800; line-height: 1.08; letter-spacing: -0.035em; }
+  h2 { font-size: var(--fs-h2); }
+  h3 { font-size: var(--fs-h3); letter-spacing: -0.015em; line-height: 1.3; }
+  html[lang='ar'] :is(h1, h2, h3, h4) { line-height: 1.4; }
+
+  p { margin: 0; text-wrap: pretty; }
+  a { color: inherit; text-decoration: none; }
+  img,
+  svg { display: block; max-width: 100%; }
+  button { font: inherit; }
+
+  ::selection { background: rgb(248 184 77 / 0.35); color: inherit; }
+
+  :focus-visible {
+    outline: 2.5px solid var(--color-orange-600);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  [data-tone='dark'] :focus-visible { outline-color: var(--color-gold-500); }
+  main:focus { outline: none; }
+
+  html.is-locked,
+  html.is-locked body { overflow: hidden; }
+}
+
+/* 4. Shared ---------------------------------------------------------------- */
+@layer components {
+  .container {
+    width: 100%;
+    max-width: calc(var(--container) + var(--gutter) * 2);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .skip-link {
+    position: fixed;
+    top: 12px;
+    inset-inline-start: 12px;
+    z-index: 200;
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    background: var(--color-navy-950);
+    color: #fff;
+    font-weight: 600;
+    transform: translateY(-160%);
+    transition: transform 0.25s var(--ease);
+  }
+  .skip-link:focus-visible { transform: translateY(0); }
+
+  .lead { font-size: var(--fs-lead); line-height: 1.7; color: var(--body); }
+  .text-gold { color: var(--color-gold-500); }
+
+  /* Arrows and other directional icons point the other way in Arabic. */
+  .icon-dir { transform: scaleX(var(--flip)); }
+
+  /* Phone numbers and emails stay left-to-right inside Arabic text. */
+  .ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+  /* Buttons ------------------------------------------------------------------ */
+  .btn {
+    --btn-bg: var(--color-navy-950);
+    --btn-fg: #fff;
+    --btn-border: transparent;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 50px;
+    padding: 12px 24px;
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius-sm);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgb(12 34 68 / 0.12);
+    transition:
+      background-color 0.25s var(--ease),
+      color 0.25s var(--ease),
+      border-color 0.25s var(--ease),
+      box-shadow 0.3s var(--ease),
+      transform 0.3s var(--ease);
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -14px rgb(12 34 68 / 0.5); }
+  .btn:active { transform: translateY(0); }
+  .btn .btn__icon { flex: none; transition: transform 0.3s var(--ease); }
+  .btn .btn__icon--end { transform: scaleX(var(--flip)); }
+  .btn:hover .btn__icon--end { transform: scaleX(var(--flip)) translateX(3px); }
+  .btn[aria-disabled='true'],
+  .btn:disabled { opacity: 0.6; pointer-events: none; }
+
+  .btn--sm { min-height: 42px; padding: 9px 18px; font-size: 0.9375rem; }
+  .btn--lg { min-height: 56px; padding: 14px 28px; font-size: 1.0625rem; }
+  .btn--block { width: 100%; }
+
+  .btn--navy { --btn-bg: var(--color-navy-950); --btn-fg: #fff; }
+  .btn--navy:hover { --btn-bg: var(--color-navy-800); }
+
+  .btn--gold { --btn-bg: var(--color-gold-500); --btn-fg: var(--color-navy-950); }
+  .btn--gold:hover { --btn-bg: var(--color-gold-400); box-shadow: 0 14px 30px -14px rgb(248 184 77 / 0.7); }
+
+  /* Translucent white, used beside a gold button on navy backgrounds. */
+  .btn--navy-soft { --btn-bg: rgb(255 255 255 / 0.1); --btn-fg: #fff; --btn-border: rgb(255 255 255 / 0.22); backdrop-filter: blur(6px); }
+  .btn--navy-soft:hover { --btn-bg: rgb(255 255 255 / 0.18); --btn-border: rgb(255 255 255 / 0.35); }
+
+  .btn--white { --btn-bg: #fff; --btn-fg: var(--color-navy-950); --btn-border: var(--border); }
+  .btn--white:hover { --btn-border: var(--color-navy-950); }
+
+  .btn--link {
+    --btn-bg: transparent;
+    --btn-fg: var(--color-navy-950);
+    min-height: auto;
+    padding: 4px 0;
+    box-shadow: none;
+  }
+  .btn--link:hover { transform: none; box-shadow: none; --btn-fg: var(--color-orange-600); }
+  .btn--link-orange { --btn-bg: transparent; --btn-fg: var(--color-orange-600); min-height: auto; padding: 4px 0; box-shadow: none; }
+  .btn--link-orange:hover { transform: none; box-shadow: none; --btn-fg: var(--color-navy-950); }
+
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Reading-progress hairline at the very top of the viewport. */
+  .scroll-progress {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 120;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-gold-500), var(--color-gold-300));
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    pointer-events: none;
+  }
+  [dir='rtl'] .scroll-progress { transform-origin: 100% 50%; }
+}
+
+/* 5. Motion ---------------------------------------------------------------- */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  @view-transition {
+    navigation: none;
+  }
+}

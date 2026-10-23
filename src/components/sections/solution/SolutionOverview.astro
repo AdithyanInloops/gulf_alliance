@@ -1,0 +1,72 @@
+---
+/**
+ * Solution page › Overview + offerings (as designed): eyebrow, title and
+ * text, then a grid of numbered cards for the offerings listed in the content
+ * doc (e.g. CCTV, Access Control…).
+ */
+import Badge from '@/components/ui/Badge.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import IconTile from '@/components/ui/IconTile.astro';
+import Section from '@/components/ui/Section.astro';
+import type { Solution } from '@/data/types';
+
+interface Props {
+  solution: Solution;
+}
+
+const { solution } = Astro.props;
+const { overview, items } = solution.page;
+const itemId = (title: string) => `${solution.slug}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`;
+---
+
+<Section id="overview" tone="page" labelledby="overview-title">
+  <div class="so__head" data-reveal>
+    <Eyebrow variant={solution.slug === 'josoorkom' ? 'line' : 'text'}>{overview.eyebrow}</Eyebrow>
+    <h2 id="overview-title">{overview.title}</h2>
+    <p class="so__text">{overview.text}</p>
+  </div>
+
+  <ul class:list={['so__grid', `so__grid--${items.length}`]} data-reveal-group="up">
+    {
+      items.map((item, i) => (
+        <li class="so__card" id={itemId(item.title)}>
+          <div class="so__card-top">
+            <IconTile icon={item.icon} variant="light-orange" size="lg" />
+            <Badge>{String(i + 1).padStart(2, '0')}</Badge>
+          </div>
+          <h3 class="so__card-title">{item.title}</h3>
+          <p class="so__card-text">{item.text}</p>
+        </li>
+      ))
+    }
+  </ul>
+</Section>
+
+<style>
+  .so__head { max-width: 760px; }
+  .so__head h2 { color: var(--color-navy-950); }
+  .so__text { margin-top: 16px; font-size: var(--fs-lead); line-height: 1.6; color: var(--color-ink); }
+
+  .so__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin: 44px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .so__card {
+    padding: clamp(24px, 3vw, 32px);
+    border-radius: var(--radius-xl);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    scroll-margin-top: calc(var(--header-h) + 20px);
+  }
+  .so__card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .so__card-title { margin-top: 22px; font-size: clamp(1.45rem, 1.2rem + 0.8vw, 1.85rem); color: var(--color-navy-950); }
+  .so__card-text { margin-top: 12px; font-size: var(--fs-body); line-height: 1.65; color: var(--color-ink); }
+
+  @media (max-width: 767px) {
+    .so__grid { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

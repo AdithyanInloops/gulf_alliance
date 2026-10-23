@@ -1,0 +1,33 @@
+---
+/** About Us — content doc §2. Rendered at /about/ and /ar/about/. */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/sections/shared/PageHero.astro';
+import AboutOverview from '@/components/sections/about/AboutOverview.astro';
+import AboutApproach from '@/components/sections/about/AboutApproach.astro';
+import AboutMissionVision from '@/components/sections/about/AboutMissionVision.astro';
+import AboutValues from '@/components/sections/about/AboutValues.astro';
+import AboutCommitment from '@/components/sections/about/AboutCommitment.astro';
+import CtaBand from '@/components/sections/shared/CtaBand.astro';
+import { getContent } from '@/data';
+import { PHOTOS } from '@/data/media';
+import { langPaths } from '@/i18n';
+import { webPageSchema } from '@/lib/schema';
+
+export const getStaticPaths = langPaths;
+
+const { about, home } = getContent(Astro.url);
+const { seo, hero } = about;
+// The About hero has no CTA of its own in the content doc; it reuses the Home
+// hero CTAs (same wording).
+const ctas = home.hero.ctas;
+---
+
+<BaseLayout title={seo.title} description={seo.description} schema={[webPageSchema('AboutPage', seo, Astro)]}>
+  <PageHero eyebrow={hero.eyebrow} title={hero.title} text={hero.text} ctas={ctas} photo={PHOTOS.aboutHero} photoAlt={hero.title} />
+  <AboutOverview />
+  <AboutApproach />
+  <AboutMissionVision />
+  <AboutValues />
+  <AboutCommitment />
+  <CtaBand {...about.finalCta} />
+</BaseLayout>

@@ -1,0 +1,18 @@
+---
+/** Privacy Policy — placeholder until the client supplies the text (noindex, excluded from sitemap). */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import DarkHero from '@/components/sections/shared/DarkHero.astro';
+import LegalPlaceholder from '@/components/sections/shared/LegalPlaceholder.astro';
+import { fill, getContent } from '@/data';
+import { langPaths } from '@/i18n';
+
+export const getStaticPaths = langPaths;
+
+const { brand, ui } = getContent(Astro.url);
+const title = ui.legal.privacy;
+---
+
+<BaseLayout title={title} description={fill(ui.legal.seoDescription, { title })} noindex>
+  <DarkHero title={title} text={brand.description} />
+  <LegalPlaceholder title={title} />
+</BaseLayout>

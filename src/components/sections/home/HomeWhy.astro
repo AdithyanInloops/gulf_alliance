@@ -1,0 +1,57 @@
+---
+/** Home › Why Choose Us: centred heading, four numbered cards. */
+import IconTile from '@/components/ui/IconTile.astro';
+import Section from '@/components/ui/Section.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import { getContent } from '@/data';
+
+const { why } = getContent(Astro.url).home;
+---
+
+<Section id="why" tone="white" labelledby="why-title">
+  <SectionHeading eyebrow={why.eyebrow} title={why.title} id="why-title" align="center" width="narrow" />
+  <ul class="why" data-reveal-group="up">
+    {
+      why.items.map((item, i) => (
+        <li class="why__card">
+          <div class="why__top">
+            <IconTile icon={item.icon} variant="light-orange" size="lg" />
+            <span class="why__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          </div>
+          <h3 class="why__title">{item.title}</h3>
+          <p class="why__text">{item.text}</p>
+        </li>
+      ))
+    }
+  </ul>
+</Section>
+
+<style>
+  .why {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+    margin: 48px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .why__card {
+    padding: 28px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    background: var(--color-blue-100);
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), background-color 0.35s var(--ease), border-color 0.35s var(--ease);
+  }
+  .why__card:hover { transform: translateY(-4px); border-color: var(--border); background: #fff; box-shadow: var(--shadow-md); }
+  .why__top { display: flex; align-items: flex-start; justify-content: space-between; }
+  .why__num { font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 700; color: var(--color-blue-400); }
+  .why__title { margin-top: 22px; font-size: 1.2rem; color: var(--color-navy-950); }
+  .why__text { margin-top: 10px; font-size: var(--fs-small); line-height: 1.7; color: var(--color-ink); }
+
+  @media (max-width: 1023px) {
+    .why { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 599px) {
+    .why { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

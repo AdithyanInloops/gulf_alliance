@@ -1,0 +1,68 @@
+---
+/**
+ * Eyebrow + title + paragraph(s) at the top of a section.
+ * The default slot renders actions (buttons) under the text.
+ */
+import Eyebrow from './Eyebrow.astro';
+import type { IconName } from './icons';
+
+interface Props {
+  eyebrow?: string;
+  eyebrowVariant?: 'text' | 'pill' | 'line' | 'icon';
+  eyebrowIcon?: IconName;
+  title: string;
+  text?: string | string[];
+  align?: 'start' | 'center';
+  as?: 'h1' | 'h2' | 'h3';
+  id?: string;
+  width?: 'narrow' | 'wide' | 'full';
+  class?: string;
+  [attr: `data-${string}`]: string | undefined;
+}
+
+const {
+  eyebrow,
+  eyebrowVariant = 'text',
+  eyebrowIcon,
+  title,
+  text,
+  align = 'start',
+  as: Tag = 'h2',
+  id,
+  width = 'wide',
+  class: className,
+  ...rest
+} = Astro.props;
+
+const paragraphs = text ? (Array.isArray(text) ? text : [text]) : [];
+---
+
+<div class:list={['sh', `sh--${align}`, `sh--${width}`, className]} data-reveal {...rest}>
+  {eyebrow && <Eyebrow variant={eyebrowVariant} icon={eyebrowIcon}>{eyebrow}</Eyebrow>}
+  <Tag id={id} class="sh__title">{title}</Tag>
+  {paragraphs.map((p) => <p class="sh__text">{p}</p>)}
+  {
+    Astro.slots.has('default') && (
+      <div class="sh__actions">
+        <slot />
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .sh { display: flex; flex-direction: column; align-items: flex-start; }
+  .sh--center { align-items: center; text-align: center; margin-inline: auto; }
+  .sh--narrow { max-width: 760px; }
+  .sh--wide { max-width: 720px; }
+  .sh--full { max-width: none; }
+  .sh__text {
+    margin-top: 16px;
+    font-size: var(--fs-lead);
+    line-height: 1.6;
+    color: var(--body);
+  }
+  .sh__text + .sh__text { margin-top: 18px; }
+  .sh__actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
+  .sh--center .sh__actions { justify-content: center; }
+</style>

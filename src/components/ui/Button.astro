@@ -1,0 +1,68 @@
+---
+/**
+ * Button / link-button. Renders <a> when `href` is set, otherwise <button>.
+ * Styles live in global.css (.btn, .btn--{variant}, .btn--{size}).
+ */
+import { getContent } from '@/data';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+type Variant = 'navy' | 'gold' | 'navy-soft' | 'white' | 'link' | 'link-orange';
+
+interface Props {
+  href?: string;
+  variant?: Variant;
+  size?: 'sm' | 'md' | 'lg';
+  /** Trailing icon; `false` hides it. External links default to an external-link icon. */
+  icon?: IconName | false;
+  iconStart?: IconName;
+  type?: 'button' | 'submit' | 'reset';
+  external?: boolean;
+  block?: boolean;
+  class?: string;
+  id?: string;
+  [attr: `data-${string}`]: string | undefined;
+  [attr: `aria-${string}`]: string | undefined;
+}
+
+const {
+  href,
+  variant = 'navy',
+  size = 'md',
+  icon,
+  iconStart,
+  type = 'button',
+  external,
+  block = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const { ui } = getContent(Astro.url);
+const isExternal = external ?? /^https?:\/\//.test(href ?? '');
+const trailing: IconName | false = icon ?? (isExternal ? 'square-arrow-out-up-right' : 'arrow-right');
+const classes = ['btn', `btn--${variant}`, `btn--${size}`, { 'btn--block': block }, className];
+---
+
+{
+  href ? (
+    <a
+      href={href}
+      class:list={classes}
+      target={isExternal ? '_blank' : undefined}
+      rel={isExternal ? 'noopener noreferrer' : undefined}
+      {...rest}
+    >
+      {iconStart && <Icon name={iconStart} class="btn__icon" size={18} strokeWidth={2} />}
+      <span class="btn__label"><slot /></span>
+      {trailing && <Icon name={trailing} class="btn__icon btn__icon--end" size={18} strokeWidth={2} />}
+      {isExternal && <span class="visually-hidden">{ui.newTab}</span>}
+    </a>
+  ) : (
+    <button type={type} class:list={classes} {...rest}>
+      {iconStart && <Icon name={iconStart} class="btn__icon" size={18} strokeWidth={2} />}
+      <span class="btn__label"><slot /></span>
+      {trailing && <Icon name={trailing} class="btn__icon btn__icon--end" size={18} strokeWidth={2} />}
+    </button>
+  )
+}

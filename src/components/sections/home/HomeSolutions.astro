@@ -1,0 +1,309 @@
+---
+/**
+ * Home › Our Solutions: heading row, a grid of flip boxes and the Josoorkom
+ * banner. The flip follows technoorbits.com.sa: a white front (big icon,
+ * name, summary) flips up — around the horizontal axis, 750 ms ease-in-out —
+ * to a navy back with the offerings and the link to the solution page.
+ * Hover (mouse) or tap / "View offerings" flips it; the back has a turn-back
+ * button and Escape.
+ */
+import { Image } from 'astro:assets';
+import Button from '@/components/ui/Button.astro';
+import CheckList from '@/components/ui/CheckList.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Section from '@/components/ui/Section.astro';
+import { findSolution, getContent } from '@/data';
+import { SOLUTION_BLOCK_PHOTOS } from '@/data/media';
+import DarkBackdrop from '@/components/sections/shared/DarkBackdrop.astro';
+
+const { home, solutions: all, ui, R } = getContent(Astro.url);
+const { solutions } = home;
+const cards = all.filter((s) => s.slug !== 'josoorkom');
+const josoorkom = findSolution(all, 'josoorkom');
+---
+
+<Section id="solutions" tone="blue" labelledby="solutions-title">
+  <div class="hs__head" data-reveal>
+    <div class="hs__heading">
+      <Eyebrow>{solutions.eyebrow}</Eyebrow>
+      <h2 id="solutions-title">{solutions.title}</h2>
+      <p class="hs__text">{solutions.text}</p>
+    </div>
+    <Button href={solutions.cta.href} variant="white">{solutions.cta.label}</Button>
+  </div>
+
+  <ul class="hs__grid" data-reveal-group="up">
+    {
+      cards.map((s) => (
+        <li class="flip" data-flip>
+          <div class="flip__inner">
+            <div class="flip__face flip__front" data-flip-front>
+              <span class="flip__icon" aria-hidden="true"><Icon name={s.icon} size={44} strokeWidth={1.5} /></span>
+              <h3 class="flip__name">{s.name}</h3>
+              <p class="flip__summary">{s.summary}</p>
+              <button type="button" class="flip__toggle" aria-expanded="false" aria-controls={`flip-${s.slug}`} data-flip-toggle>
+                <span>{ui.flip.show}</span>
+                <Icon name="chevron-down" size={16} strokeWidth={2.4} class="flip__turn" />
+              </button>
+            </div>
+
+            <div class="flip__face flip__back" id={`flip-${s.slug}`} data-tone="dark" data-flip-back>
+              <button type="button" class="flip__back-btn" data-flip-close>
+                <Icon name="rotate-cw" size={16} strokeWidth={2.2} />
+                <span class="visually-hidden">{ui.flip.hide}</span>
+              </button>
+              <span class="flip__back-icon" aria-hidden="true"><Icon name={s.icon} size={30} strokeWidth={1.6} /></span>
+              <p class="flip__back-name">{s.name}</p>
+              <CheckList items={s.page.items.map((item) => item.title)} class="flip__checks" />
+              <a href={R.solution(s.slug)} class="flip__link">
+                {s.overviewCard.cta}
+                <Icon name="arrow-right" size={18} strokeWidth={2.2} class="icon-dir" />
+              </a>
+            </div>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="hs__banner" data-tone="dark" data-reveal>
+    <DarkBackdrop arcs={false} />
+    <div class="hs__banner-photo" aria-hidden="true">
+      <Image src={SOLUTION_BLOCK_PHOTOS.josoorkom} alt="" widths={[640, 960, 1280, 1672]} sizes="(min-width: 1000px) 640px, 100vw" quality={85} />
+    </div>
+    <div class="hs__banner-copy">
+      <span class="hs__banner-pill"><Icon name="graduation-cap" size={16} strokeWidth={2} />{josoorkom.name}</span>
+      <h3 class="hs__banner-title">{josoorkom.overviewCard.title}</h3>
+      <p class="hs__banner-text">{josoorkom.overviewCard.text}</p>
+      <Button href={R.solution('josoorkom')} variant="gold" size="lg">{josoorkom.overviewCard.cta}</Button>
+    </div>
+  </div>
+</Section>
+
+<script>
+  import { isFinePointer } from '@/scripts/env';
+
+  document.querySelectorAll<HTMLElement>('[data-flip]').forEach((card) => {
+    const front = card.querySelector<HTMLElement>('[data-flip-front]')!;
+    const back = card.querySelector<HTMLElement>('[data-flip-back]')!;
+    const toggle = card.querySelector<HTMLButtonElement>('[data-flip-toggle]')!;
+    const close = card.querySelector<HTMLButtonElement>('[data-flip-close]')!;
+    const link = back.querySelector<HTMLAnchorElement>('a')!;
+
+    const setFlipped = (flipped: boolean, moveFocus = false) => {
+      card.classList.toggle('is-flipped', flipped);
+      toggle.setAttribute('aria-expanded', String(flipped));
+      front.inert = flipped;
+      back.inert = !flipped;
+      if (moveFocus) (flipped ? link : toggle).focus({ preventScroll: true });
+    };
+    setFlipped(false);
+
+    // Keyboard activation (detail === 0) moves focus to the visible side.
+    toggle.addEventListener('click', (e) => setFlipped(true, e.detail === 0));
+    close.addEventListener('click', (e) => setFlipped(false, e.detail === 0));
+    // Tapping the back (outside the link / button) turns the card back.
+    back.addEventListener('click', (e) => {
+      if (!(e.target as Element).closest('a, button')) setFlipped(false);
+    });
+    back.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setFlipped(false, true);
+    });
+
+    if (isFinePointer) {
+      card.addEventListener('pointerenter', (e) => e.pointerType === 'mouse' && setFlipped(true));
+      card.addEventListener('pointerleave', (e) => e.pointerType === 'mouse' && setFlipped(false));
+    }
+  });
+</script>
+
+<style>
+  .hs__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px 40px;
+    margin-bottom: 44px;
+  }
+  .hs__heading { max-width: 720px; }
+  .hs__heading h2 { color: var(--color-navy-950); }
+  .hs__text { margin-top: 14px; font-size: var(--fs-lead); line-height: 1.65; color: var(--color-ink); }
+
+  .hs__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Flip box (as on technoorbits.com.sa: flip up, 750 ms ease-in-out) ---------- */
+  .flip { --flip-ease: cubic-bezier(0.455, 0.03, 0.515, 0.955); }
+  .flip__inner {
+    display: grid;
+    height: 100%;
+    min-height: 330px;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+  }
+  .flip__face {
+    grid-area: 1 / 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 26px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform-style: preserve-3d;
+    transition: transform 0.75s var(--flip-ease);
+  }
+  /* Each face turns on its own: the front rolls up and away, the back rolls up into place. */
+  .flip__back { transform: rotateX(-180deg); }
+  .flip.is-flipped .flip__front { transform: rotateX(180deg); }
+  .flip.is-flipped .flip__back { transform: none; }
+
+  .flip__front {
+    border: 1px solid var(--color-navy-900);
+    background: #fff;
+    box-shadow: var(--shadow-xs);
+  }
+  .flip__icon {
+    display: grid;
+    place-items: center;
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    background: var(--color-blue-100);
+    color: var(--color-navy-900);
+    transition: background-color 0.3s var(--ease);
+  }
+  .flip__name { margin-top: 22px; font-size: 1.3rem; color: var(--color-navy-900); }
+  .flip__summary { max-width: 32ch; margin-top: 8px; font-size: var(--fs-small); line-height: 1.65; color: var(--color-ink); }
+
+  .flip__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 18px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--color-orange-600);
+    cursor: pointer;
+  }
+  /* The whole front face is the tap target. */
+  .flip__toggle::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+  .flip__toggle:focus-visible { outline: none; }
+  .flip__toggle:focus-visible::after { outline: 2.5px solid var(--color-orange-600); outline-offset: 3px; }
+  .flip__toggle :global(.flip__turn) { transition: transform 0.4s var(--ease); }
+  .flip__front:hover :global(.flip__turn) { transform: translateY(2px); }
+
+  .flip__back {
+    border: 1px solid var(--color-navy-900);
+    background: var(--color-navy-900);
+    box-shadow: var(--shadow-md);
+  }
+  .flip__back-icon { color: var(--color-gold-500); }
+  .flip__back-name { margin-top: 10px; font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: #fff; }
+  .flip__back :global(.flip__checks) { justify-items: start; margin-top: 16px; gap: 10px; text-align: start; }
+  .flip__back :global(.flip__checks li) { font-size: var(--fs-small); color: #fff; }
+  .flip__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 22px;
+    padding: 11px 20px;
+    border-radius: var(--radius-sm);
+    background: var(--color-gold-500);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-navy-950);
+    transition: background-color 0.2s;
+  }
+  .flip__link:hover { background: var(--color-gold-400); }
+  .flip__back-btn {
+    position: absolute;
+    top: 12px;
+    inset-inline-end: 12px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+  }
+  .flip__back-btn:hover { background: rgb(255 255 255 / 0.12); }
+
+  /* Without JavaScript, hovering still flips the box. */
+  @media (hover: hover) {
+    :global(html:not(.js)) .flip:hover .flip__front { transform: rotateX(180deg); }
+    :global(html:not(.js)) .flip:hover .flip__back { transform: none; }
+  }
+
+  /* Josoorkom banner ------------------------------------------------------------- */
+  .hs__banner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+    margin-top: 24px;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(100deg, var(--color-navy-900) 0%, var(--color-navy-800) 100%);
+    box-shadow: var(--shadow-md);
+  }
+  .hs__banner-copy { position: relative; padding: clamp(28px, 4vw, 48px); }
+  .hs__banner-photo { position: relative; grid-column: 2; grid-row: 1; min-height: 260px; }
+  .hs__banner-photo :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hs__banner-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--color-navy-800) 0%, rgb(25 63 115 / 0.3) 45%, transparent 100%);
+  }
+  :global([dir='rtl']) .hs__banner-photo::after { background: linear-gradient(270deg, var(--color-navy-800) 0%, rgb(25 63 115 / 0.3) 45%, transparent 100%); }
+  .hs__banner-copy { grid-column: 1; grid-row: 1; }
+  .hs__banner-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--color-gold-500);
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--color-navy-950);
+  }
+  .hs__banner-title { margin-top: 18px; font-size: clamp(1.5rem, 1.2rem + 1vw, 2.1rem); color: #fff; }
+  .hs__banner-text { margin: 12px 0 26px; max-width: 56ch; font-size: var(--fs-body); line-height: 1.7; color: var(--color-blue-300); }
+
+  @media (max-width: 1023px) {
+    .hs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 767px) {
+    .hs__banner { grid-template-columns: minmax(0, 1fr); }
+    .hs__banner-photo { grid-column: 1; grid-row: 1; min-height: 200px; }
+    .hs__banner-photo::after,
+    :global([dir='rtl']) .hs__banner-photo::after { background: linear-gradient(0deg, var(--color-navy-900) 0%, transparent 70%); }
+    .hs__banner-copy { grid-row: 2; padding-top: 8px; }
+  }
+  @media (max-width: 639px) {
+    .hs__grid { grid-template-columns: minmax(0, 1fr); }
+    .flip__inner { min-height: 300px; }
+  }
+</style>

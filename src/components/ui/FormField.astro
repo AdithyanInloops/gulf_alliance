@@ -1,0 +1,171 @@
+---
+/**
+ * Labelled form control: light-blue fill, bold label, "*Mandatory" marker,
+ * optional icon or prefix chip inside the field. Email and phone fields stay
+ * left-to-right on Arabic pages. The error element id is `${id}-error`,
+ * filled by scripts/forms.ts.
+ */
+import { getContent } from '@/data';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  id: string;
+  name: string;
+  label: string;
+  type?: 'text' | 'email' | 'tel' | 'select' | 'textarea';
+  required?: boolean;
+  autocomplete?: string;
+  options?: Option[];
+  /** Text of the empty first option for selects. */
+  placeholder?: string;
+  rows?: number;
+  maxlength?: number;
+  inputmode?: 'text' | 'email' | 'tel' | 'numeric';
+  icon?: IconName;
+  /** Short prefix chip shown inside the field (e.g. "+966"). */
+  prefix?: string;
+  autofocus?: boolean;
+  class?: string;
+}
+
+const {
+  id,
+  name,
+  label,
+  type = 'text',
+  required = false,
+  autocomplete,
+  options = [],
+  placeholder,
+  rows = 4,
+  maxlength,
+  inputmode,
+  icon,
+  prefix,
+  autofocus,
+  class: className,
+} = Astro.props;
+
+const { ui } = getContent(Astro.url);
+const errorId = `${id}-error`;
+const ltr = type === 'email' || type === 'tel';
+---
+
+<div class:list={['field', `field--${type}`, { 'field--icon': icon, 'field--prefix': prefix }, className]} data-field>
+  <div class="field__head">
+    <label for={id} class="field__label">{label}</label>
+    {required && <span class="field__req">{ui.form.mandatory}</span>}
+  </div>
+
+  <div class="field__box" dir={ltr ? 'ltr' : undefined}>
+    {prefix && <span class="field__prefix" aria-hidden="true">{prefix}</span>}
+    {
+      type === 'textarea' ? (
+        <textarea id={id} name={name} rows={rows} required={required} maxlength={maxlength} aria-describedby={errorId} class="field__control" />
+      ) : type === 'select' ? (
+        <select id={id} name={name} required={required} aria-describedby={errorId} class="field__control">
+          <option value="">{placeholder ?? label}</option>
+          {options.map((o) => (
+            <option value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          id={id}
+          name={name}
+          type={type}
+          required={required}
+          autocomplete={autocomplete}
+          inputmode={inputmode}
+          maxlength={maxlength}
+          aria-describedby={errorId}
+          autofocus={autofocus}
+          class="field__control"
+        />
+      )
+    }
+    {type === 'select' && <Icon name="chevron-down" size={18} class="field__icon" />}
+    {icon && type !== 'select' && <Icon name={icon} size={19} class="field__icon" />}
+  </div>
+
+  <p class="field__error" id={errorId} data-error aria-live="polite"></p>
+</div>
+
+<style>
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .field__label {
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--color-navy-950);
+  }
+  .field__req {
+    font-family: var(--font-display);
+    font-size: var(--fs-2xs);
+    font-weight: 600;
+    color: var(--color-orange-600);
+  }
+
+  .field__box { position: relative; display: flex; }
+  .field__control {
+    width: 100%;
+    min-height: 50px;
+    padding: 12px 16px;
+    border: 1.5px solid var(--color-blue-200);
+    border-radius: var(--radius-sm);
+    background: var(--color-blue-50);
+    color: var(--color-navy-950);
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  }
+  .field__control:hover { border-color: var(--color-blue-400); }
+  .field__control:focus {
+    outline: none;
+    border-color: var(--color-navy-700);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgb(34 77 136 / 0.14);
+  }
+  textarea.field__control { min-height: 128px; resize: vertical; }
+  select.field__control { appearance: none; padding-inline-end: 46px; cursor: pointer; }
+  .field--icon .field__control { padding-inline-end: 46px; }
+
+  .field__box :global(.field__icon) {
+    position: absolute;
+    inset-inline-end: 15px;
+    top: 50%;
+    translate: 0 -50%;
+    color: #6b7383;
+    pointer-events: none;
+  }
+
+  .field--prefix .field__control { padding-inline-start: 70px; }
+  .field__prefix {
+    position: absolute;
+    inset-block: 1.5px;
+    inset-inline-start: 1.5px;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 58px;
+    border-start-start-radius: calc(var(--radius-sm) - 1.5px);
+    border-end-start-radius: calc(var(--radius-sm) - 1.5px);
+    background: var(--color-blue-150);
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--color-navy-950);
+  }
+
+  .field__error { margin: 0; font-size: var(--fs-xs); font-weight: 600; color: #be123c; }
+  .field__error:empty { display: none; }
+  .field:has([aria-invalid='true']) .field__control { border-color: #e11d48; background: #fff; }
+</style>

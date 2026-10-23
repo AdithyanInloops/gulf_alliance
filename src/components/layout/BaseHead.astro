@@ -1,0 +1,130 @@
+---
+/**
+ * <head> contents: title, description, canonical + hreflang alternates,
+ * robots, Open Graph, Twitter card, icons, font preloads and JSON-LD
+ * (Organization + WebSite on every page, plus anything page-specific passed
+ * via `schema`).
+ */
+import jakartaFont from '@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2?url';
+import interFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import plexArabic400 from '@fontsource/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-400-normal.woff2?url';
+import plexArabic700 from '@fontsource/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-700-normal.woff2?url';
+import { LANG_META, LANGS, switchLang } from '@/i18n';
+import { getContent } from '@/data';
+import { SITE } from '@/data/site';
+
+export interface Props {
+  /** Page name. " | <company name>" is appended unless already present. */
+  title: string;
+  description: string;
+  /** Social share image (absolute or root-relative). */
+  image?: string;
+  imageAlt?: string;
+  noindex?: boolean;
+  ogType?: 'website' | 'article';
+  schema?: Record<string, unknown>[];
+}
+
+const { lang, brand, R } = getContent(Astro.url);
+const {
+  title,
+  description,
+  image = '/og-default.png',
+  imageAlt = `${brand.name} — ${brand.tagline}`,
+  noindex = false,
+  ogType = 'website',
+  schema = [],
+} = Astro.props;
+
+const origin = Astro.site ?? Astro.url;
+const fullTitle = title.includes(brand.name) ? title : `${title} | ${brand.name}`;
+const canonical = new URL(Astro.url.pathname, origin).href;
+const alternates = LANGS.map((l) => ({ lang: l, href: new URL(switchLang(Astro.url, l), origin).href }));
+const ogImage = new URL(image, origin).href;
+const home = new URL('/', origin).href;
+const orgId = `${home}#organization`;
+const fonts = lang === 'ar' ? [plexArabic400, plexArabic700] : [jakartaFont, interFont];
+const socialUrls = SITE.social.map((s) => s.href).filter(Boolean);
+
+const organization = {
+  '@type': 'Organization',
+  '@id': orgId,
+  name: brand.name,
+  alternateName: brand.shortName,
+  url: home,
+  logo: { '@type': 'ImageObject', url: new URL('/logo.png', origin).href, width: 600, height: 600 },
+  slogan: brand.tagline,
+  description: brand.description,
+  email: SITE.contact.email,
+  telephone: SITE.contact.phoneHref.replace('tel:', ''),
+  address: { '@type': 'PostalAddress', ...SITE.contact.postal },
+  areaServed: { '@type': 'Country', name: 'Saudi Arabia' },
+  contactPoint: [
+    {
+      '@type': 'ContactPoint',
+      contactType: 'customer service',
+      telephone: SITE.contact.phoneHref.replace('tel:', ''),
+      email: SITE.contact.email,
+      areaServed: 'SA',
+      availableLanguage: ['English', 'Arabic'],
+    },
+  ],
+  ...(socialUrls.length ? { sameAs: socialUrls } : {}),
+};
+
+const website = {
+  '@type': 'WebSite',
+  '@id': `${new URL(R.home, origin).href}#website`,
+  url: new URL(R.home, origin).href,
+  name: brand.name,
+  inLanguage: lang,
+  publisher: { '@id': orgId },
+};
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [organization, website, ...schema],
+};
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{!noindex && alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+{!noindex && <link rel="alternate" hreflang="x-default" href={alternates[0].href} />}
+<meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
+<meta name="theme-color" content={SITE.themeColor} />
+<meta name="format-detection" content="telephone=no" />
+<meta name="geo.region" content="SA-04" />
+<meta name="geo.placename" content="Al Khobar" />
+
+<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+{fonts.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
+
+<meta property="og:type" content={ogType} />
+<meta property="og:site_name" content={brand.name} />
+<meta property="og:locale" content={LANG_META[lang].ogLocale} />
+{LANGS.filter((l) => l !== lang).map((l) => <meta property="og:locale:alternate" content={LANG_META[l].ogLocale} />)}
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={imageAlt} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content={imageAlt} />
+
+<meta name="generator" content={Astro.generator} />
+<script type="application/ld+json" set:html={JSON.stringify(graph)} />

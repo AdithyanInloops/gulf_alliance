@@ -1,0 +1,56 @@
+---
+/**
+ * Closing call-to-action band (Home, About, Solutions, Contact): navy panel,
+ * centred title + text, gold primary button and a phone button.
+ */
+import Button from '@/components/ui/Button.astro';
+import type { IconName } from '@/components/ui/icons';
+import { SITE } from '@/data/site';
+import type { FinalCtaBlock } from '@/data/types';
+import DarkBackdrop from './DarkBackdrop.astro';
+
+interface Props extends FinalCtaBlock {
+  icon?: IconName;
+}
+
+const { title, text, cta, icon = 'arrow-right' } = Astro.props;
+---
+
+<section class="band" aria-labelledby="cta-title">
+  <div class="container">
+    <div class="band__panel" data-tone="dark" data-reveal>
+      <DarkBackdrop grid />
+      <span class="band__pill" aria-hidden="true"><span></span></span>
+      <h2 id="cta-title" class="band__title">{title}</h2>
+      <p class="band__text">{text}</p>
+      <div class="band__actions">
+        <Button href={cta.href} external={cta.external} variant="gold" size="lg" icon={icon}>{cta.label}</Button>
+        <Button href={SITE.contact.phoneHref} variant="navy-soft" size="lg" iconStart="phone" icon={false}><span class="ltr">{SITE.contact.phoneDisplay}</span></Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The section above already ends with its own padding; add space only after a tinted section. */
+  .band { padding-block: 0 clamp(64px, 8vw, 112px); background: var(--bg); }
+  :global(.section--blue, .section--blue-strong, .section--white) + .band { padding-top: clamp(64px, 8vw, 112px); }
+  .band__panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: clamp(48px, 7vw, 88px) clamp(24px, 5vw, 64px);
+    border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, var(--color-navy-800) 0%, var(--color-navy-900) 60%, var(--color-navy-950) 100%);
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+  .band__pill { display: inline-flex; align-items: center; width: 40px; height: 16px; margin-bottom: 26px; padding-inline-start: 12px; border-radius: 99px; background: rgb(255 255 255 / 0.12); }
+  .band__pill span { width: 7px; height: 7px; border-radius: 50%; background: var(--color-gold-500); }
+  .band__title { max-width: 860px; font-size: clamp(1.9rem, 1.35rem + 1.8vw, 2.8rem); color: #fff; }
+  .band__text { max-width: 720px; margin-top: 20px; font-size: var(--fs-lead); line-height: 1.7; color: var(--color-blue-300); }
+  .band__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 36px; }
+</style>

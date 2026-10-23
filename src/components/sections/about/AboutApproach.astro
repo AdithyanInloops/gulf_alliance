@@ -1,0 +1,65 @@
+---
+/**
+ * About › Our Approach (as designed): heading and paragraph on the left, three
+ * cards on the right. The card titles are the three things the paragraph
+ * names: clear communication, relevant offerings and business relationships.
+ */
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import IconTile from '@/components/ui/IconTile.astro';
+import Section from '@/components/ui/Section.astro';
+import { getContent } from '@/data';
+
+const { approach } = getContent(Astro.url).about;
+const [lineA, lineB] = approach.titleLines;
+---
+
+<Section tone="blue" labelledby="approach-title">
+  <div class="ap">
+    <div class="ap__copy" data-reveal>
+      <Eyebrow variant="pill">{approach.eyebrow}</Eyebrow>
+      <h2 id="approach-title">{lineA}<br />{lineB}</h2>
+      <p class="ap__text">{approach.text}</p>
+    </div>
+    <ul class="ap__cards" data-reveal-group="up">
+      {
+        approach.pillars.map((p, i) => (
+          <li class="ap__card">
+            <IconTile icon={p.icon} variant="navy" size="lg" />
+            <h3 class="ap__card-title">{p.title}</h3>
+            <span class="ap__card-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Section>
+
+<style>
+  .ap {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    align-items: center;
+    gap: clamp(32px, 5vw, 48px);
+  }
+  .ap__copy h2 { color: var(--color-navy-950); }
+  .ap__text { margin-top: 20px; font-size: var(--fs-lead); line-height: 1.75; color: var(--color-ink); }
+  .ap__cards { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+  .ap__card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 26px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    box-shadow: var(--shadow-xs);
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  }
+  .ap__card:hover { transform: translateX(calc(6px * var(--flip))); box-shadow: var(--shadow-md); }
+  .ap__card-num { margin-inline-start: auto; font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; color: var(--color-blue-150); }
+  .ap__card-title { font-size: 1.2rem; color: var(--color-navy-950); }
+
+  @media (max-width: 899px) {
+    .ap { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

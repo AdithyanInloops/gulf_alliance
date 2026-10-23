@@ -1,0 +1,24 @@
+---
+/** Contact Us — content doc §12. Rendered at /contact/ and /ar/contact/. */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import DarkHero from '@/components/sections/shared/DarkHero.astro';
+import ContactStrip from '@/components/sections/contact/ContactStrip.astro';
+import ContactMain from '@/components/sections/contact/ContactMain.astro';
+import CtaBand from '@/components/sections/shared/CtaBand.astro';
+import { getContent } from '@/data';
+import { langPaths } from '@/i18n';
+import { webPageSchema } from '@/lib/schema';
+
+export const getStaticPaths = langPaths;
+
+const { contact } = getContent(Astro.url);
+const { seo, hero } = contact;
+---
+
+<BaseLayout title={seo.title} description={seo.description} schema={[webPageSchema('ContactPage', seo, Astro)]}>
+  <DarkHero title={hero.title} text={hero.text}>
+    <ContactStrip />
+  </DarkHero>
+  <ContactMain />
+  <CtaBand {...contact.finalCta} icon="mail" />
+</BaseLayout>

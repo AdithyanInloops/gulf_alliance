@@ -1,0 +1,206 @@
+---
+/**
+ * Josoorkom gate: every link to the Josoorkom platform (SITE.josoorkomUrl)
+ * opens this dialog first. The visitor gives name, surname, mobile and email;
+ * on submit the details are POSTed to Web3Forms or PUBLIC_FORM_ENDPOINT (when
+ * set — lib/form-endpoint.ts) and the visitor continues to the platform in the
+ * same tab. Without JavaScript the links simply go to the platform.
+ */
+import Button from '@/components/ui/Button.astro';
+import FormField from '@/components/ui/FormField.astro';
+import Icon from '@/components/ui/Icon.astro';
+import IconTile from '@/components/ui/IconTile.astro';
+import { getContent } from '@/data';
+import { SITE } from '@/data/site';
+import { FORM_ENDPOINT, WEB3FORMS_KEY } from '@/lib/form-endpoint';
+
+const { brand, ui } = getContent(Astro.url);
+const t = ui.josoorkom;
+const endpoint = FORM_ENDPOINT;
+---
+
+<dialog class="jd" aria-labelledby="jd-title" aria-describedby="jd-text" data-josoorkom-dialog data-url={SITE.josoorkomUrl} data-lenis-prevent>
+  <div class="jd__panel">
+    <div class="jd__head">
+      <IconTile icon="graduation-cap" variant="gold" size="lg" />
+      <div>
+        <h2 id="jd-title" class="jd__title">{t.title}</h2>
+        <p id="jd-text" class="jd__text">{t.text}</p>
+      </div>
+      <button type="button" class="jd__close" data-jd-close>
+        <Icon name="x" size={20} strokeWidth={2.2} />
+        <span class="visually-hidden">{t.close}</span>
+      </button>
+    </div>
+
+    <form
+      class="jd__form"
+      method="post"
+      novalidate
+      data-jd-form
+      data-endpoint={endpoint}
+      data-msg-required={ui.form.required}
+      data-msg-email={ui.form.email}
+      data-msg-phone={ui.form.phone}
+      data-msg-redirecting={t.redirecting}
+    >
+      <input type="hidden" name="formType" value="Josoorkom visit" />
+      {
+        WEB3FORMS_KEY && (
+          <>
+            <input type="hidden" name="access_key" value={WEB3FORMS_KEY} />
+            <input type="hidden" name="from_name" value={`${brand.shortName} Website`} />
+            <input type="hidden" name="subject" value="Josoorkom visit — new visitor details" />
+          </>
+        )
+      }
+      <div class="jd__grid">
+        <FormField id="jd-first-name" name="firstName" label={t.firstName} required autocomplete="given-name" maxlength={80} autofocus />
+        <FormField id="jd-last-name" name="lastName" label={t.lastName} required autocomplete="family-name" maxlength={80} />
+        <FormField id="jd-mobile" name="mobile" type="tel" label={t.mobile} required autocomplete="tel" inputmode="tel" maxlength={32} prefix="+966" class="jd__full" />
+        <FormField id="jd-email" name="email" type="email" label={t.email} required autocomplete="email" inputmode="email" maxlength={160} class="jd__full" />
+      </div>
+      <div class="jd__trap" aria-hidden="true">
+        <label for="jd-website">Website</label>
+        <input id="jd-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+      <Button type="submit" variant="gold" size="lg" icon="square-arrow-out-up-right" block data-jd-submit>{t.submit}</Button>
+      <p class="jd__note"><Icon name="globe" size={16} />{t.note}</p>
+      <p class="jd__status" role="status" aria-live="polite" data-jd-status></p>
+    </form>
+  </div>
+</dialog>
+
+<script>
+  import { lockScroll, unlockScroll } from '@/scripts/smooth-scroll';
+  import { setupValidation, withCountryCode } from '@/scripts/forms';
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-josoorkom-dialog]');
+  const form = dialog?.querySelector<HTMLFormElement>('[data-jd-form]');
+
+  if (dialog && form && typeof dialog.showModal === 'function') {
+    const url = dialog.dataset.url ?? '';
+    const host = new URL(url).host;
+    const status = form.querySelector<HTMLElement>('[data-jd-status]')!;
+    const submitBtn = form.querySelector<HTMLButtonElement>('[data-jd-submit]')!;
+    const validation = setupValidation(form);
+
+    const open = () => {
+      validation.reset();
+      status.textContent = '';
+      dialog.showModal();
+      lockScroll();
+    };
+    const close = () => dialog.close();
+
+    dialog.addEventListener('close', unlockScroll);
+    dialog.querySelector('[data-jd-close]')?.addEventListener('click', close);
+    // Click on the dimmed backdrop closes the dialog.
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) close();
+    });
+
+    // Intercept every link to the platform.
+    document.addEventListener('click', (e) => {
+      const link = (e.target as Element).closest<HTMLAnchorElement>('a[href]');
+      if (!link || link.host !== host || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault();
+      open();
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (validation.validateAll().length) return;
+      const data = new FormData(form);
+      if (String(data.get('website') ?? '').trim()) return; // bot
+      data.delete('website');
+      data.set('mobile', withCountryCode(String(data.get('mobile') ?? '').trim()));
+
+      submitBtn.disabled = true;
+      status.textContent = form.dataset.msgRedirecting ?? '';
+
+      const endpoint = form.dataset.endpoint;
+      if (endpoint) {
+        // Record the visitor, but never keep them waiting more than 4 s.
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), 4000);
+        try {
+          await fetch(endpoint, { method: 'POST', body: data, headers: { Accept: 'application/json' }, signal: controller.signal });
+        } catch {
+          /* continue to the platform regardless */
+        } finally {
+          window.clearTimeout(timer);
+        }
+      }
+      window.location.href = url;
+    });
+  }
+</script>
+
+<style>
+  .jd {
+    width: min(540px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-xl);
+    background: #fff;
+    box-shadow: 0 40px 80px -30px rgb(12 34 68 / 0.6);
+    color: var(--color-ink);
+    overflow: auto;
+  }
+  .jd[open] { animation: jd-in 0.45s var(--ease); }
+  .jd::backdrop { background: rgb(12 34 68 / 0.55); backdrop-filter: blur(6px); }
+  .jd[open]::backdrop { animation: jd-fade 0.3s var(--ease); }
+
+  .jd__head {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 28px 28px 24px;
+    background:
+      radial-gradient(120% 140% at 100% 0%, rgb(248 184 77 / 0.22), transparent 55%),
+      linear-gradient(135deg, var(--color-navy-900), var(--color-navy-700));
+    color: var(--color-blue-300);
+  }
+  .jd__title { padding-inline-end: 36px; font-size: clamp(1.35rem, 1.2rem + 0.6vw, 1.6rem); color: #fff; }
+  .jd__text { margin-top: 8px; font-size: var(--fs-small); line-height: 1.6; color: var(--color-blue-300); }
+  .jd__close {
+    position: absolute;
+    top: 16px;
+    inset-inline-end: 16px;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.12);
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .jd__close:hover { background: rgb(255 255 255 / 0.24); }
+
+  .jd__form { padding: 26px 28px 28px; }
+  .jd__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 24px; }
+  .jd__grid :global(.jd__full) { grid-column: 1 / -1; }
+  .jd__trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .jd__note { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; font-size: var(--fs-xs); color: var(--muted); }
+  .jd__status { margin-top: 10px; text-align: center; font-size: var(--fs-small); font-weight: 600; color: var(--color-navy-700); }
+  .jd__status:empty { display: none; }
+
+  @keyframes jd-in {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  }
+  @keyframes jd-fade {
+    from { opacity: 0; }
+  }
+  @media (max-width: 479px) {
+    .jd__grid { grid-template-columns: minmax(0, 1fr); }
+    .jd__head { padding: 24px 20px 20px; }
+    .jd__form { padding: 22px 20px 24px; }
+  }
+</style>

@@ -15,6 +15,12 @@ export const ABOUT = {
   hero: {
     eyebrow: 'About Us',
     title: 'About Gulf Alliance Solutions Company',
+    /** The same title split for colouring (logo blue / gold); the parts joined with spaces equal `title`. */
+    titleParts: [
+      { text: 'About' },
+      { text: 'Gulf Alliance', tone: 'blue' },
+      { text: 'Solutions Company', tone: 'gold' },
+    ] as { text: string; tone?: 'blue' | 'gold' }[],
     text: 'Gulf Alliance Solutions Company focuses on providing solutions across multiple business sectors, including healthcare, building systems, lighting, e-commerce, and information technology. We aim to connect customers with relevant offerings that address their requirements and support their business needs.',
   },
 

@@ -19,6 +19,11 @@ interface Props {
   eyebrowVariant?: 'pill' | 'icon' | 'line' | 'text';
   eyebrowIcon?: IconName;
   title: string;
+  /**
+   * Optional coloured version of the title in the display font (About hero):
+   * parts joined with spaces must equal `title`. tone: blue | gold (logo colours).
+   */
+  titleParts?: { text: string; tone?: 'blue' | 'gold' }[];
   text: string;
   ctas?: Cta[];
   photo: ImageMetadata;
@@ -36,6 +41,7 @@ const {
   eyebrowVariant = 'pill',
   eyebrowIcon,
   title,
+  titleParts,
   text,
   ctas = [],
   photo,
@@ -61,7 +67,18 @@ const iconFor = (cta: Cta, i: number): IconName => {
   <div class="container ph__inner">
     <div class="ph__content">
       <Eyebrow variant={eyebrowVariant} icon={eyebrowIcon} class="ph__anim">{eyebrow}</Eyebrow>
-      <h1 id="page-title" class="ph__title ph__anim">{title}</h1>
+      <h1 id="page-title" class:list={['ph__title', 'ph__anim', { 'ph__title--display': titleParts }]}>
+        {
+          titleParts
+            ? titleParts.map((part, i) => (
+                <>
+                  {i > 0 && ' '}
+                  <span class:list={['ph__part', part.tone && `ph__part--${part.tone}`]}>{part.text}</span>
+                </>
+              ))
+            : title
+        }
+      </h1>
       <p class="ph__text ph__anim">{text}</p>
       {
         ctas.length > 0 && (
@@ -121,6 +138,30 @@ const iconFor = (cta: Cta, i: number): IconName => {
     gap: clamp(32px, 5vw, 64px);
   }
   .ph__title { margin-top: 6px; font-size: var(--fs-h1); color: var(--color-navy-950); }
+  /* Display title (About): Playfair Display / El Messiri, logo blue + gold. The
+     page that uses it imports the two fonts (pages/[...lang]/about.astro). */
+  .ph__title--display {
+    font-family: 'Playfair Display Variable', Georgia, 'Times New Roman', serif;
+    font-size: clamp(2.5rem, 1.5rem + 3.2vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+  }
+  :global(html[lang='ar']) .ph__title--display { font-family: 'El Messiri Variable', var(--font-arabic); line-height: 1.3; }
+  .ph__part--blue {
+    background: linear-gradient(100deg, #2f6fdc 0%, #1c4fae 60%, #153f90 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Deep gold: the logo's gold, darkened enough to read on the light background. */
+  .ph__part--gold {
+    display: block;
+    background: linear-gradient(100deg, #d39516 0%, #b97a08 55%, #a86a04 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
   .ph__text { margin-top: 22px; max-width: 58ch; font-size: var(--fs-lead); line-height: 1.7; color: var(--color-ink); }
   .ph__actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
 

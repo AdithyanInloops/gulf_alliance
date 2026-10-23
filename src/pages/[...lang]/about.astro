@@ -1,5 +1,8 @@
 ---
 /** About Us — content doc §2. Rendered at /about/ and /ar/about/. */
+// Display fonts for the coloured About title (this page only).
+import '@fontsource-variable/playfair-display';
+import '@fontsource-variable/el-messiri';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHero from '@/components/sections/shared/PageHero.astro';
 import AboutOverview from '@/components/sections/about/AboutOverview.astro';
@@ -23,7 +26,7 @@ const ctas = home.hero.ctas;
 ---
 
 <BaseLayout title={seo.title} description={seo.description} schema={[webPageSchema('AboutPage', seo, Astro)]}>
-  <PageHero eyebrow={hero.eyebrow} title={hero.title} text={hero.text} ctas={ctas} photo={PHOTOS.aboutHero} photoAlt={hero.title} />
+  <PageHero eyebrow={hero.eyebrow} title={hero.title} titleParts={hero.titleParts} text={hero.text} ctas={ctas} photo={PHOTOS.aboutHero} photoAlt={hero.title} />
   <AboutOverview />
   <AboutApproach />
   <AboutMissionVision />

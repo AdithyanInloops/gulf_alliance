@@ -12,11 +12,12 @@
 import type { ImageMetadata } from 'astro';
 import type { SolutionSlug } from './types';
 
-// Home / About
+// Home / About / Contact
 import heroSkyline from '@/assets/photos/home-hero-riyadh.jpg';
 import overviewTeam from '@/assets/photos/home-overview-team.jpg';
 import headquarters from '@/assets/photos/company-headquarters.jpg';
 import commitmentTeam from '@/assets/photos/about-commitment-team.jpg';
+import contactReception from '@/assets/photos/contact-hero.jpg';
 
 // Solutions — hero
 import medicalTheatre from '@/assets/photos/medical-operating-theatre.png';
@@ -43,6 +44,8 @@ export const PHOTOS = {
   homeOverview: overviewTeam,
   aboutHero: headquarters,
   aboutCommitment: commitmentTeam,
+  /** Contact hero — GULFASCO reception. */
+  contactHero: contactReception,
 };
 
 /** Hero photo on each solution page; also cycles in the Home hero orbit. */
@@ -91,6 +94,7 @@ const FOCUS = new Map<ImageMetadata, string>([
   [overviewTeam, '52% 50%'],
   [headquarters, '62% 55%'],
   [commitmentTeam, '52% 45%'],
+  [contactReception, '22% 50%'],
   [medicalTheatre, '62% 55%'],
   [lowCurrentMeetingRoom, '50% 55%'],
   [lightingEntrance, '30% 50%'],
@@ -99,7 +103,7 @@ const FOCUS = new Map<ImageMetadata, string>([
   [itDataCentre, '45% 50%'],
   [josoorkomClassroom, '50% 40%'],
   [medicalPatientCare, '28% 50%'],
-  [lowCurrentNetwork, '38% 40%'],
+  [lowCurrentNetwork, '10% 40%'],
   [lightingInterior, '40% 50%'],
   [elevatorMaintenance, '42% 50%'],
   [ecommerceSeller, '40% 45%'],

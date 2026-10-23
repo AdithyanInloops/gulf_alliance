@@ -1,0 +1,132 @@
+---
+/**
+ * Contact › hero: navy section with the heading, intro and the phone / email /
+ * address list on one side, and the GULFASCO reception photo on the other
+ * (mirrored on Arabic pages).
+ */
+import Icon from '@/components/ui/Icon.astro';
+import IconTile from '@/components/ui/IconTile.astro';
+import Photo from '@/components/ui/Photo.astro';
+import { getContent } from '@/data';
+import { PHOTOS } from '@/data/media';
+import DarkBackdrop from '@/components/sections/shared/DarkBackdrop.astro';
+
+const { brand, contact, ui } = getContent(Astro.url);
+const { hero, info } = contact;
+const iconFor = { phone: 'phone-call', email: 'mail', address: 'building-2' } as const;
+---
+
+<section class="ch" data-tone="dark" aria-labelledby="page-title">
+  <DarkBackdrop grid />
+  <div class="container ch__inner">
+    <div class="ch__copy">
+      <span class="ch__pill ch__anim" aria-hidden="true"><span></span></span>
+      <h1 id="page-title" class="ch__title ch__anim">{hero.title}</h1>
+      <p class="ch__text ch__anim">{hero.text}</p>
+
+      <ul class="ch__list ch__anim">
+        {
+          info.items.map((item) => {
+            const external = item.href.startsWith('http');
+            return (
+              <li>
+                <a href={item.href} class="ch__item" target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>
+                  <IconTile icon={iconFor[item.key]} variant="gold" />
+                  <span class="ch__item-body">
+                    <span class="ch__label">{item.label}</span>
+                    <span class="ch__value">{item.key === 'address' ? item.value : <span class="ltr">{item.value}</span>}</span>
+                  </span>
+                  <Icon name="arrow-up-right" size={18} strokeWidth={2} class="ch__go icon-dir" />
+                  {external && <span class="visually-hidden">{ui.newTab}</span>}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+
+    <div class="ch__visual ch__anim">
+      <span class="ch__glow" aria-hidden="true"></span>
+      <Photo src={PHOTOS.contactHero} alt={brand.name} ratio="7 / 5" radius="xl" eager sizes="(min-width: 1000px) 600px, 100vw" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .ch {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: calc(var(--header-h) + clamp(44px, 5vw, 80px)) 0 clamp(56px, 6vw, 88px);
+    background: linear-gradient(160deg, var(--color-navy-800) 0%, var(--color-navy-900) 55%, var(--color-navy-950) 100%);
+  }
+  .ch__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(36px, 5vw, 72px);
+  }
+
+  /* Copy ---------------------------------------------------------------------------- */
+  .ch__pill { display: inline-flex; align-items: center; width: 40px; height: 16px; padding-inline-start: 12px; border-radius: 99px; background: rgb(255 255 255 / 0.12); }
+  .ch__pill span { width: 7px; height: 7px; border-radius: 50%; background: var(--color-gold-500); }
+  .ch__title { margin-top: 22px; font-size: clamp(2.2rem, 1.4rem + 2.6vw, 3.5rem); line-height: 1.06; letter-spacing: -0.035em; color: #fff; }
+  .ch__text { margin-top: 20px; max-width: 58ch; font-size: var(--fs-lead); line-height: 1.7; color: var(--color-blue-300); }
+
+  /* Phone / email / address: one glass card, rows split by hairlines. */
+  .ch__list {
+    display: grid;
+    margin: 32px 0 0;
+    padding: 6px 18px;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    list-style: none;
+  }
+  .ch__list li + li { border-top: 1px solid rgb(255 255 255 / 0.1); }
+  .ch__item { display: flex; align-items: center; gap: 16px; padding: 14px 0; }
+  .ch__item-body { flex: 1; min-width: 0; }
+  .ch__label {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--fs-2xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-blue-400);
+  }
+  .ch__value { display: block; margin-top: 2px; font-family: var(--font-display); font-size: 1rem; font-weight: 600; line-height: 1.45; color: #fff; overflow-wrap: anywhere; transition: color 0.2s; }
+  .ch__item :global(.ch__go) { flex: none; color: var(--color-blue-400); transition: color 0.2s, translate 0.25s var(--ease); }
+  .ch__item:hover .ch__value { color: var(--color-gold-400); }
+  .ch__item:hover :global(.ch__go) { color: var(--color-gold-500); translate: calc(2px * var(--flip)) -2px; }
+
+  /* Photo ---------------------------------------------------------------------------- */
+  .ch__visual { position: relative; }
+  .ch__visual :global(.photo) { border: 1px solid rgb(255 255 255 / 0.16); box-shadow: 0 40px 80px -36px rgb(0 0 0 / 0.75); }
+  .ch__glow {
+    position: absolute;
+    z-index: -1;
+    inset: 12% -6% -8% 10%;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(248 184 77 / 0.28), transparent);
+    filter: blur(30px);
+  }
+
+  /* Entrance ------------------------------------------------------------------------- */
+  .ch :global(.ch__anim) { animation: ch-in 0.9s var(--ease) backwards; }
+  .ch__title { animation-delay: 0.06s; }
+  .ch__text { animation-delay: 0.12s; }
+  .ch__list { animation-delay: 0.18s; }
+  .ch__visual { animation-delay: 0.2s; }
+  @keyframes ch-in {
+    from { opacity: 0; transform: translateY(16px); }
+  }
+
+  @media (max-width: 999px) {
+    .ch__inner { grid-template-columns: minmax(0, 1fr); }
+    .ch__visual { max-width: 640px; }
+  }
+</style>

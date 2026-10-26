@@ -2,12 +2,15 @@
 /**
  * Company logo (client artwork in src/assets/brand).
  *   variant="header"  the horizontal artwork alone (it carries the wordmark)
- *   variant="footer"  the artwork on a white chip (footer, on navy)
+ *   variant="footer"  the light artwork (white wordmark) for navy backgrounds
  *   variant="stacked" / "horizontal"  the artwork alone, any height
+ * `swap` also renders the light artwork on top, hidden until the parent shows
+ * it (the header does while the navy mobile menu is open).
  * Images are optimised by Astro to WebP at 1×/2×/3× density.
  */
 import { Image } from 'astro:assets';
 import logoHorizontal from '@/assets/brand/logo-horizontal.png';
+import logoLight from '@/assets/brand/logo-horizontal-light.png';
 import logoStacked from '@/assets/brand/logo-stacked.png';
 import { getContent } from '@/data';
 
@@ -17,13 +20,14 @@ interface Props {
   height?: number;
   href?: string | false;
   eager?: boolean;
+  swap?: boolean;
   class?: string;
 }
 
 const { brand, ui, R } = getContent(Astro.url);
-const { variant = 'header', height, href = R.home, eager = false, class: className } = Astro.props;
-const art = variant === 'stacked' ? logoStacked : logoHorizontal;
-const h = height ?? { header: 72, footer: 46, stacked: 200, horizontal: 60 }[variant];
+const { variant = 'header', height, href = R.home, eager = false, swap = false, class: className } = Astro.props;
+const art = { header: logoHorizontal, footer: logoLight, stacked: logoStacked, horizontal: logoHorizontal }[variant];
+const h = height ?? { header: 72, footer: 58, stacked: 200, horizontal: 60 }[variant];
 const w = Math.round((art.width / art.height) * h);
 const Tag = href ? 'a' : 'span';
 ---
@@ -35,13 +39,13 @@ const Tag = href ? 'a' : 'span';
 >
   <span class="logo__art">
     <Image src={art} alt={brand.name} width={w} height={h} densities={[1, 2, 3]} loading={eager || variant === 'header' ? 'eager' : 'lazy'} class="logo__img" style={`height:${h}px`} />
+    {swap && <Image src={logoLight} alt="" width={w} height={h} densities={[1, 2, 3]} class="logo__img logo__img--light" style={`height:${h}px`} />}
   </span>
 </Tag>
 
 <style>
   .logo { display: inline-flex; align-items: center; gap: 14px; border-radius: 8px; color: inherit; }
-  .logo__art { flex: none; display: inline-flex; }
-  .logo :global(.logo__img) { width: auto; max-width: none; height: auto; }
-
-  .logo--footer .logo__art { padding: 10px 14px; border-radius: 12px; background: #fff; }
+  .logo__art { position: relative; flex: none; display: inline-flex; }
+  .logo :global(.logo__img) { width: auto; max-width: none; height: auto; transition: opacity 0.35s var(--ease); }
+  .logo :global(.logo__img--light) { position: absolute; inset-block-start: 0; inset-inline-start: 0; opacity: 0; }
 </style>

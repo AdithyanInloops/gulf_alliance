@@ -5,6 +5,9 @@
  *   apple-touch-icon.png (180, mark on white — iOS fills transparency black)
  *   logo.png (stacked logo on white, 600×600 — used in JSON-LD)
  *   og-default.png (1200×630 social share image)
+ * and, next to the client's files, src/assets/brand/logo-horizontal-light.png:
+ * the horizontal logo for navy backgrounds (footer) — wordmark in white, the
+ * mark's blues brightened, gold untouched.
  *
  * Run with `npm run assets` after replacing the logo files.
  */
@@ -63,3 +66,25 @@ await sharp(Buffer.from(bg))
   .png()
   .toFile(`${out}og-default.png`);
 console.log('✓ og-default.png');
+
+// Light logo for navy backgrounds -------------------------------------------------
+{
+  const { data, info } = await sharp(horizontal).raw().toBuffer({ resolveWithObject: true });
+  // The mark (spheres + swoosh) sits in the left 560 of the artwork's 1641 px; the wordmark is to its right.
+  const markEnd = Math.round(info.width * (560 / 1641));
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] === 0) continue;
+    const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+    if (r > b + 30) continue; // gold: keep
+    if ((i / 4) % info.width >= markEnd) {
+      data[i] = data[i + 1] = data[i + 2] = 255; // navy wordmark → white (edges keep their alpha)
+    } else {
+      // Blue spheres and swoosh: same hue, brighter, so they hold up on navy.
+      data[i] = Math.min(255, Math.round(r * 1.6 + 16));
+      data[i + 1] = Math.min(255, Math.round(g * 1.6 + 20));
+      data[i + 2] = Math.min(255, Math.round(b * 1.6 + 28));
+    }
+  }
+  await sharp(data, { raw: info }).png({ compressionLevel: 9 }).toFile(`${brand}logo-horizontal-light.png`);
+  console.log('✓ src/assets/brand/logo-horizontal-light.png');
+}

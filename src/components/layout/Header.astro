@@ -208,14 +208,25 @@ const langLinks = (['en', 'ar'] as const).map((l) => ({ lang: l, href: switchLan
     position: fixed;
     inset: 0 0 auto 0;
     z-index: 100;
+    border-bottom: 1px solid rgb(12 34 68 / 0.06);
+    transition: box-shadow 0.3s var(--ease);
+  }
+  /* The frosted background sits on a pseudo-element: backdrop-filter on the
+     header itself would make it the containing block of the fixed mobile menu,
+     which Safari (every iPhone browser) then squeezes to the header's height. */
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background: rgb(255 255 255 / 0.94);
     backdrop-filter: saturate(1.4) blur(14px);
     -webkit-backdrop-filter: saturate(1.4) blur(14px);
-    border-bottom: 1px solid rgb(12 34 68 / 0.06);
-    transition: box-shadow 0.3s var(--ease), background-color 0.3s var(--ease);
+    transition: background-color 0.3s var(--ease);
   }
-  .header.is-scrolled { background: rgb(255 255 255 / 0.97); box-shadow: 0 10px 30px -18px rgb(12 34 68 / 0.35); }
-  .menu-open.header { background: #fff; }
+  .header.is-scrolled { box-shadow: 0 10px 30px -18px rgb(12 34 68 / 0.35); }
+  .header.is-scrolled::before { background: rgb(255 255 255 / 0.97); }
+  .menu-open.header::before { background: #fff; }
 
   .header__inner {
     display: flex;
@@ -227,8 +238,11 @@ const langLinks = (['en', 'ar'] as const).map((l) => ({ lang: l, href: switchLan
 
   /* Nav --------------------------------------------------------------------- */
   .nav { display: none; }
-  .nav__list { display: flex; align-items: center; gap: 4px; margin: 0; padding: 0; list-style: none; }
+  .nav__list { position: relative; display: flex; align-items: center; gap: 4px; margin: 0; padding: 0; list-style: none; }
   .nav__item { position: relative; display: flex; align-items: center; }
+  /* The dropdown centres on the whole nav, not on "Solutions", so it stays on
+     screen at laptop widths. */
+  .nav__item--drop { position: static; }
   .nav__link {
     padding: 10px 14px;
     border-radius: var(--radius-sm);
@@ -266,7 +280,6 @@ const langLinks = (['en', 'ar'] as const).map((l) => ({ lang: l, href: switchLan
     left: 50%;
     top: calc(100% + 14px);
     width: 600px;
-    translate: -50% 0;
     padding: 10px;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -274,11 +287,13 @@ const langLinks = (['en', 'ar'] as const).map((l) => ({ lang: l, href: switchLan
     box-shadow: var(--shadow-lg);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(6px);
+    /* Centring lives in transform: the CSS minifier drops a separate `translate`
+       declared next to `transform`. */
+    transform: translate(-50%, 6px);
     transition: opacity 0.2s var(--ease), transform 0.3s var(--ease), visibility 0s linear 0.2s;
   }
   .drop::before { content: ''; position: absolute; inset: -16px 0 auto; height: 16px; }
-  .nav__item--drop.is-open .drop { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+  .nav__item--drop.is-open .drop { opacity: 1; visibility: visible; transform: translateX(-50%); transition-delay: 0s; }
   .drop__list { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin: 0; padding: 0; list-style: none; }
   .drop__link { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: var(--radius-md); transition: background-color 0.2s; }
   .drop__link:hover,
@@ -400,11 +415,21 @@ const langLinks = (['en', 'ar'] as const).map((l) => ({ lang: l, href: switchLan
     .burger,
     .mobile { display: none; }
   }
-  /* Phones: short labels in the slider, smaller logo. */
+  /* Small laptops / landscape tablets: the nav and the full-size logo fill the
+     row, so the CTA (the same page as "Contact Us") waits for wider screens. */
+  @media (min-width: 1080px) and (max-width: 1279px) {
+    .header__actions :global(.header__cta) { display: none; }
+  }
+  /* Below the desktop nav the logo shares the bar with the slider and buttons only. */
+  @media (max-width: 1079px) {
+    .header :global(.logo__img) { height: 64px !important; }
+  }
+  /* Phones: short labels in the slider; the logo grows with the screen width. */
   @media (max-width: 479px) {
+    .header__inner { gap: 12px; }
     .lang__long { display: none; }
     .lang__short { display: inline; }
     .lang__opt { min-width: 40px; padding: 0 8px; }
-    .header :global(.logo__img) { height: 44px !important; }
+    .header :global(.logo__img) { height: clamp(44px, 13.4vw, 58px) !important; }
   }
 </style>

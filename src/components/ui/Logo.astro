@@ -23,7 +23,7 @@ interface Props {
 const { brand, ui, R } = getContent(Astro.url);
 const { variant = 'header', height, href = R.home, eager = false, class: className } = Astro.props;
 const art = variant === 'stacked' ? logoStacked : logoHorizontal;
-const h = height ?? { header: 54, footer: 46, stacked: 200, horizontal: 60 }[variant];
+const h = height ?? { header: 72, footer: 46, stacked: 200, horizontal: 60 }[variant];
 const w = Math.round((art.width / art.height) * h);
 const Tag = href ? 'a' : 'span';
 ---

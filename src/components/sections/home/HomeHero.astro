@@ -5,6 +5,7 @@
  * gradient that keeps the headline readable:
  * - company-name pill, two-line headline (second line gold), intro, buttons
  * - a ticker of all solutions scrolling along the bottom edge
+ * On phones and portrait tablets the photo is a full-width band above the copy.
  * The zoom pauses while the hero is off screen; nothing moves with "reduce
  * motion". The previous "logo orbit" hero is archived in
  * docs/design-archive/home-hero-logo-orbit.md.
@@ -28,7 +29,7 @@ const focus = focusOf(PHOTOS.homeHero);
       src={PHOTOS.homeHero}
       alt=""
       widths={[960, 1280, PHOTOS.homeHero.width]}
-      sizes="(min-width: 1000px) 120vw, 200vw"
+      sizes="(max-width: 767px) 100vw, (max-width: 1024px) and (orientation: portrait) 100vw, 120vw"
       quality={90}
       loading="eager"
       fetchpriority="high"
@@ -193,16 +194,33 @@ const focus = focusOf(PHOTOS.homeHero);
   @keyframes ticker { to { transform: translateX(-50%); } }
   @keyframes ticker-rtl { to { transform: translateX(50%); } }
 
-  /* Phones: keep the icons and the tower visible on top, copy at the bottom. */
-  @media (max-width: 767px) {
-    .hero { min-height: 100svh; }
-    .hero__media :global(.hero__img) { object-position: 64% 50% !important; transform-origin: 64% 35%; }
-    .hero__shade,
-    :global([dir='rtl']) .hero__shade {
-      background: linear-gradient(180deg, rgb(12 34 68 / 0.2) 0%, rgb(12 34 68 / 0.3) 30%, rgb(12 34 68 / 0.88) 58%, rgb(12 34 68 / 0.96) 100%);
+  /* Phones and portrait tablets: the wide photo can't fill a tall screen without
+     losing most of it, so it becomes a band on top — the whole skyline, the flag
+     and every icon, still zooming — with the copy below it on navy. */
+  @media (max-width: 767px), (max-width: 1024px) and (orientation: portrait) {
+    .hero { min-height: 0; background: linear-gradient(180deg, var(--color-navy-900) 0%, var(--color-navy-950) 100%); }
+    .hero__media { position: relative; inset: auto; z-index: 0; aspect-ratio: 16 / 9; }
+    .hero__media::after {
+      content: '';
+      position: absolute;
+      inset: auto 0 0;
+      height: 36%;
+      background: linear-gradient(180deg, rgb(16 48 92 / 0), var(--color-navy-900));
     }
-    .hero__inner { align-items: flex-end; padding-top: 30vh; padding-bottom: 36px; }
+    .hero__media :global(.hero__img) {
+      object-position: 50% 50% !important;
+      transform-origin: 56% 45%;
+      animation-name: hero-zoom-band;
+      animation-duration: 12s;
+    }
+    .hero__shade { display: none; }
+    .hero__inner { position: relative; align-items: flex-start; margin-top: -26px; padding-block: 0 40px; }
+    .hero__content { text-shadow: none; }
     .hero__actions :global(.btn) { flex: 1 1 100%; }
+  }
+  @keyframes hero-zoom-band {
+    from { transform: scale(1); }
+    to { transform: scale(1.09); }
   }
   @media (prefers-reduced-motion: reduce) {
     .hero__media :global(.hero__img),

@@ -11,7 +11,8 @@ import { prefersReducedMotion } from './env';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const HEADER_OFFSET = 92;
+/** Fixed header height (--header-h, which changes at the desktop breakpoint) plus a little air. */
+const headerOffset = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 84) + 8;
 
 export const lenis: Lenis | null = prefersReducedMotion
   ? null
@@ -19,7 +20,7 @@ export const lenis: Lenis | null = prefersReducedMotion
       lerp: 0.1,
       smoothWheel: true,
       // Same-page "#id" links glide instead of jumping.
-      anchors: { offset: -HEADER_OFFSET },
+      anchors: { offset: -headerOffset() },
     });
 
 if (lenis) {
@@ -40,6 +41,6 @@ export function unlockScroll() {
 
 /** Scroll to an element (smoothly when Lenis is active). */
 export function scrollToElement(target: HTMLElement) {
-  if (lenis) lenis.scrollTo(target, { offset: -HEADER_OFFSET });
+  if (lenis) lenis.scrollTo(target, { offset: -headerOffset() });
   else target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
 }

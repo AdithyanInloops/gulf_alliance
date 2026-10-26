@@ -5,7 +5,8 @@
  * name, summary) flips up — around the horizontal axis, 750 ms ease-in-out —
  * to a navy back with the offerings and the link to the solution page.
  * Hover (mouse) or tap / "View offerings" flips it; the back has a turn-back
- * button and Escape.
+ * button and Escape. On touch screens each box tips up once when it first
+ * comes into view, hinting that it turns over.
  */
 import { Image } from 'astro:assets';
 import Button from '@/components/ui/Button.astro';
@@ -82,9 +83,26 @@ const josoorkom = findSolution(all, 'josoorkom');
 </Section>
 
 <script>
-  import { isFinePointer } from '@/scripts/env';
+  import { isFinePointer, prefersReducedMotion } from '@/scripts/env';
 
-  document.querySelectorAll<HTMLElement>('[data-flip]').forEach((card) => {
+  const cards = document.querySelectorAll<HTMLElement>('[data-flip]');
+
+  // Touch screens can't hover: each box tips up once the first time it is in
+  // view, a hint that it turns over (tap) like it does under the mouse.
+  if (!isFinePointer && !prefersReducedMotion && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-hinting');
+          io.unobserve(entry.target);
+        }),
+      { threshold: 0.75 },
+    );
+    cards.forEach((card) => io.observe(card));
+  }
+
+  cards.forEach((card) => {
     const front = card.querySelector<HTMLElement>('[data-flip-front]')!;
     const back = card.querySelector<HTMLElement>('[data-flip-back]')!;
     const toggle = card.querySelector<HTMLButtonElement>('[data-flip-toggle]')!;
@@ -247,6 +265,13 @@ const josoorkom = findSolution(all, 'josoorkom');
     cursor: pointer;
   }
   .flip__back-btn:hover { background: rgb(255 255 255 / 0.12); }
+
+  /* Touch hint (see the script): the box tips up and settles back. */
+  .flip.is-hinting:not(.is-flipped) .flip__inner { animation: flip-hint 1.2s 0.45s var(--flip-ease) both; }
+  @keyframes flip-hint {
+    0%, 100% { transform: none; }
+    45% { transform: perspective(900px) rotateX(24deg); }
+  }
 
   /* Without JavaScript, hovering still flips the box. */
   @media (hover: hover) {

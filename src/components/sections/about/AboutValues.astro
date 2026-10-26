@@ -40,7 +40,8 @@ const { values } = getContent(Astro.url).about;
     box-shadow: var(--shadow-xs);
     transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
   }
-  .values__card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .values__card:hover,
+  .values__card.is-focus { transform: translateY(-4px); box-shadow: var(--shadow-md); }
   .values__card:last-child { grid-column: span 2; }
   .values__name { margin-top: 18px; font-size: 1.2rem; color: var(--color-navy-950); }
   .values__text { margin-top: 12px; font-size: var(--fs-small); line-height: 1.7; color: var(--color-ink); }

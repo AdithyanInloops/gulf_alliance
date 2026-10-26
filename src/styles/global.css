@@ -88,6 +88,10 @@
 
   color-scheme: light;
 }
+/* Desktop header (with the nav) is taller to fit the full-size logo. */
+@media (min-width: 1080px) {
+  :root { --header-h: 96px; }
+}
 
 /* Arabic: one typeface, no letter-spacing (it breaks joined letters), more leading. */
 html[lang='ar'] {

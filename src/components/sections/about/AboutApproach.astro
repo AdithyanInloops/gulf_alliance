@@ -55,7 +55,8 @@ const [lineA, lineB] = approach.titleLines;
     box-shadow: var(--shadow-xs);
     transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
   }
-  .ap__card:hover { transform: translateX(calc(6px * var(--flip))); box-shadow: var(--shadow-md); }
+  .ap__card:hover,
+  .ap__card.is-focus { transform: translateX(calc(6px * var(--flip))); box-shadow: var(--shadow-md); }
   .ap__card-num { margin-inline-start: auto; font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; color: var(--color-blue-150); }
   .ap__card-title { font-size: 1.2rem; color: var(--color-navy-950); }
 

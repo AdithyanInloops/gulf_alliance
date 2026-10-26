@@ -67,7 +67,7 @@ const email = SITE.contact.email;
     <FormField id={f('name')} name="fullName" label={fields.fullName} required autocomplete="name" maxlength={120} icon={icons ? 'user' : undefined} />
     <FormField id={f('company')} name="company" label={fields.company} autocomplete="organization" maxlength={160} icon={icons ? 'building-2' : undefined} />
     <FormField id={f('email')} name="email" type="email" label={fields.email} required autocomplete="email" inputmode="email" maxlength={160} icon={icons ? 'at-sign' : undefined} />
-    <FormField id={f('phone')} name="phone" type="tel" label={fields.phone} autocomplete="tel" inputmode="tel" maxlength={32} icon={icons ? 'phone' : undefined} prefix="+966" />
+    <FormField id={f('phone')} name="phone" type="tel" label={fields.phone} required autocomplete="tel" inputmode="tel" maxlength={32} icon={icons ? 'phone' : undefined} prefix="+966" />
     <FormField id={f('solution')} name="solution" type="select" label={fields.solution} options={options} class="ef__full" />
     <FormField id={f('message')} name="message" type="textarea" label={fields.message} required rows={4} maxlength={4000} class="ef__full" />
   </div>

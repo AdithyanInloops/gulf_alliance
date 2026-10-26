@@ -60,12 +60,14 @@ const { intro } = solutionsPage;
     box-shadow: var(--shadow-xs);
     transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease), border-color 0.25s var(--ease);
   }
-  .si__card:hover { transform: translateY(-2px); border-color: var(--color-blue-200); box-shadow: var(--shadow-md); }
+  .si__card:hover,
+  .is-focus > .si__card { transform: translateY(-2px); border-color: var(--color-blue-200); box-shadow: var(--shadow-md); }
   .si__card :global(.tile) { grid-row: span 2; }
   .si__num { font-family: var(--font-display); font-size: var(--fs-2xs); font-weight: 700; color: var(--color-orange-600); }
   .si__name { grid-column: 2; font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--color-navy-950); }
   .si__card :global(.si__arrow) { grid-column: 3; grid-row: 1 / span 2; color: var(--color-blue-400); transition: transform 0.25s var(--ease), color 0.25s; }
-  .si__card:hover :global(.si__arrow) { color: var(--color-orange-600); transform: translateY(2px); }
+  .si__card:hover :global(.si__arrow),
+  .is-focus > .si__card :global(.si__arrow) { color: var(--color-orange-600); transform: translateY(2px); }
 
   @media (max-width: 899px) {
     .si { grid-template-columns: minmax(0, 1fr); }

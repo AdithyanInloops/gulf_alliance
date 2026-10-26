@@ -2,7 +2,8 @@
  * Site-wide motion layer. Components opt in with data attributes:
  *
  *   data-reveal="up|fade|scale|tilt|left|right"   scroll reveal (+ data-reveal-delay="0.2")
- *   data-reveal-group="tilt|up|scale"             direct children reveal in a stagger
+ *   data-reveal-group="tilt|up|scale"             direct children reveal in a stagger as they arrive
+ *                                                 (on touch screens they also get .is-focus mid-screen)
  *   data-split                                    heading words rise from a mask
  *   data-parallax="0.15"                          drifts while scrolling (speed, ±)
  *   data-tilt                                     pointer 3D tilt (uses --rx/--ry/--gx/--gy CSS variables)
@@ -28,6 +29,8 @@ const FROM: Record<RevealType, gsap.TweenVars> = {
   left: { x: -48, opacity: 0 },
   right: { x: 48, opacity: 0 },
 };
+/** End state of every FROM preset. */
+const SHOWN: gsap.TweenVars = { x: 0, y: 0, scale: 1, rotateX: 0, opacity: 1 };
 
 const inInitialViewport = (el: Element) => el.getBoundingClientRect().top < window.innerHeight * 0.92;
 
@@ -47,17 +50,19 @@ function initReveals() {
     });
   });
 
+  // Children reveal in batches as they arrive: a desktop row animates together
+  // with a stagger, while in a one-column phone layout each card animates as it
+  // scrolls into view (not the whole list at once, mostly off screen).
   gsap.utils.toArray<HTMLElement>('[data-reveal-group]').forEach((group) => {
-    if (inInitialViewport(group)) return;
     const type = (group.dataset.revealGroup as RevealType) || 'tilt';
-    const children = Array.from(group.children) as HTMLElement[];
-    gsap.from(children, {
-      ...FROM[type],
-      duration: 1.15,
-      ease: 'power3.out',
-      stagger: 0.09,
-      clearProps: 'transform,opacity',
-      scrollTrigger: { trigger: group, start: 'top 86%', once: true },
+    const children = (Array.from(group.children) as HTMLElement[]).filter((el) => !inInitialViewport(el));
+    if (!children.length) return;
+    gsap.set(children, FROM[type]);
+    ScrollTrigger.batch(children, {
+      start: 'top 92%',
+      once: true,
+      onEnter: (batch) =>
+        gsap.to(batch, { ...SHOWN, duration: 1.15, ease: 'power3.out', stagger: 0.09, overwrite: true, clearProps: 'transform,opacity' }),
     });
   });
 }
@@ -171,6 +176,19 @@ function initMagnetic() {
   });
 }
 
+/**
+ * Touch screens have no hover: the card crossing the middle of the screen gets
+ * `.is-focus`, which the cards style like their hover state (lift + shadow).
+ */
+function initTouchFocus() {
+  const cards = document.querySelectorAll<HTMLElement>('[data-reveal-group] > *');
+  if (!cards.length || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => e.target.classList.toggle('is-focus', e.isIntersecting)), {
+    rootMargin: '-42% 0px -42% 0px',
+  });
+  cards.forEach((el) => io.observe(el));
+}
+
 function initScrollProgress() {
   const bar = document.querySelector<HTMLElement>('[data-progress]');
   if (!bar) return;
@@ -220,6 +238,8 @@ export function initMotion() {
   if (isFinePointer) {
     initTilt();
     initMagnetic();
+  } else {
+    initTouchFocus();
   }
 
   // Layout can shift once web fonts and images arrive.

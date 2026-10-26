@@ -50,7 +50,8 @@ const { industries } = getContent(Astro.url).home;
     text-align: center;
     transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.35s var(--ease);
   }
-  .ind__card:hover { transform: translateY(-4px); border-color: var(--color-blue-200); box-shadow: var(--shadow-md); }
+  .ind__card:hover,
+  .ind__card.is-focus { transform: translateY(-4px); border-color: var(--color-blue-200); box-shadow: var(--shadow-md); }
   .ind__title { font-size: 1.05rem; line-height: 1.4; color: var(--color-navy-950); }
 
   @media (max-width: 1023px) {

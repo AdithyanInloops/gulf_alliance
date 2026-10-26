@@ -2,16 +2,18 @@
 /**
  * Company logo (client artwork in src/assets/brand).
  *   variant="header"  the horizontal artwork alone (it carries the wordmark)
- *   variant="footer"  the light artwork (white wordmark) for navy backgrounds
+ *   variant="footer"  the light stacked artwork (white name, large) for navy backgrounds
  *   variant="stacked" / "horizontal"  the artwork alone, any height
  * `swap` also renders the light artwork on top, hidden until the parent shows
  * it (the header does while the navy mobile menu is open).
- * Images are optimised by Astro to WebP at 1×/2×/3× density.
+ * Images are optimised by Astro to WebP at 1×/2×/3× density, at full quality
+ * so the small lettering stays crisp.
  */
 import { Image } from 'astro:assets';
 import logoHorizontal from '@/assets/brand/logo-horizontal.png';
 import logoLight from '@/assets/brand/logo-horizontal-light.png';
 import logoStacked from '@/assets/brand/logo-stacked.png';
+import logoStackedLight from '@/assets/brand/logo-stacked-light.png';
 import { getContent } from '@/data';
 
 interface Props {
@@ -26,8 +28,8 @@ interface Props {
 
 const { brand, ui, R } = getContent(Astro.url);
 const { variant = 'header', height, href = R.home, eager = false, swap = false, class: className } = Astro.props;
-const art = { header: logoHorizontal, footer: logoLight, stacked: logoStacked, horizontal: logoHorizontal }[variant];
-const h = height ?? { header: 72, footer: 58, stacked: 200, horizontal: 60 }[variant];
+const art = { header: logoHorizontal, footer: logoStackedLight, stacked: logoStacked, horizontal: logoHorizontal }[variant];
+const h = height ?? { header: 72, footer: 170, stacked: 200, horizontal: 60 }[variant];
 const w = Math.round((art.width / art.height) * h);
 const Tag = href ? 'a' : 'span';
 ---
@@ -38,8 +40,8 @@ const Tag = href ? 'a' : 'span';
   aria-label={href ? `${brand.name} — ${ui.logoHome}` : undefined}
 >
   <span class="logo__art">
-    <Image src={art} alt={brand.name} width={w} height={h} densities={[1, 2, 3]} loading={eager || variant === 'header' ? 'eager' : 'lazy'} class="logo__img" style={`height:${h}px`} />
-    {swap && <Image src={logoLight} alt="" width={w} height={h} densities={[1, 2, 3]} class="logo__img logo__img--light" style={`height:${h}px`} />}
+    <Image src={art} alt={brand.name} width={w} height={h} densities={[1, 2, 3]} quality="max" loading={eager || variant === 'header' ? 'eager' : 'lazy'} class="logo__img" style={`height:${h}px`} />
+    {swap && <Image src={logoLight} alt="" width={w} height={h} densities={[1, 2, 3]} quality="max" class="logo__img logo__img--light" style={`height:${h}px`} />}
   </span>
 </Tag>
 

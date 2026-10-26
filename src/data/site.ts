@@ -32,6 +32,17 @@ export const SITE = {
    */
   josoorkomUrl: 'https://www.josoorcom.com/',
   /**
+   * Web3Forms access keys (web3forms.com dashboard), one per form. Access keys
+   * are public by design — they appear in the page HTML and can only deliver
+   * to the inbox they were created for. Wiring: src/lib/form-endpoint.ts.
+   */
+  forms: {
+    /** Contact page + solution pages enquiry form. */
+    enquiryKey: 'fe2d6a5d-4acc-4418-9ee8-5eff029a9b60',
+    /** Josoorkom sign-up pop-up. */
+    josoorkomKey: 'e764c457-b3ba-446f-a0c7-c62fc97925c4',
+  },
+  /**
    * Social profiles, shown as icons in the footer ("Follow Us").
    * TODO(client): paste each profile URL into `href`, e.g.
    *   'https://www.linkedin.com/company/…', 'https://x.com/…', 'https://www.instagram.com/…'

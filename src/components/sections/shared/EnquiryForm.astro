@@ -5,17 +5,17 @@
  *
  * - `solution` preselects "Solution of Interest" (also read from ?solution=)
  * - inline validation with accessible error messages (scripts/forms.ts)
- * - POSTs FormData to Web3Forms (PUBLIC_WEB3FORMS_ACCESS_KEY) or to
- *   PUBLIC_FORM_ENDPOINT when set (lib/form-endpoint.ts); otherwise opens the
+ * - POSTs FormData to Web3Forms with the enquiry form's access key (or to a
+ *   custom endpoint — lib/form-endpoint.ts); with neither, opens the
  *   visitor's email app addressed to info@gulfasco.com, prefilled
  * - honeypot field for basic spam protection
  * The script handles every [data-enquiry-form] on the page.
  */
 import Button from '@/components/ui/Button.astro';
 import FormField from '@/components/ui/FormField.astro';
-import { fill, getContent } from '@/data';
+import { contentFor, fill, getContent } from '@/data';
 import { SITE } from '@/data/site';
-import { FORM_ENDPOINT, WEB3FORMS_KEY } from '@/lib/form-endpoint';
+import { formTarget } from '@/lib/form-endpoint';
 import type { SolutionSlug } from '@/data/types';
 
 interface Props {
@@ -28,9 +28,12 @@ interface Props {
 }
 
 const { id = 'enquiry-form', solution, icons = false, class: className } = Astro.props;
-const { brand, contact, solutions, ui } = getContent(Astro.url);
+const { brand, contact, solutions, ui, lang } = getContent(Astro.url);
+// What arrives in the company inbox is always in English (subject, solution name).
+const en = contentFor('en');
+const solutionNamesEn = Object.fromEntries(en.solutions.map((s) => [s.slug, s.name]));
 const { fields, submit } = contact.form;
-const endpoint = FORM_ENDPOINT;
+const { endpoint, web3formsKey } = formTarget('enquiry');
 const options = solutions.map((s) => ({ value: s.slug, label: s.name }));
 const f = (name: string) => `${id}-${name}`;
 const email = SITE.contact.email;
@@ -55,6 +58,8 @@ const email = SITE.contact.email;
   data-msg-error={fill(ui.form.error, { email })}
   data-msg-mailto={fill(ui.form.mailto, { email })}
   data-subject={ui.form.subject}
+  data-subject-en={en.ui.form.subject}
+  data-solution-names-en={JSON.stringify(solutionNamesEn)}
   data-labels={JSON.stringify(fields)}
   novalidate
 >
@@ -68,11 +73,12 @@ const email = SITE.contact.email;
   </div>
 
   {
-    WEB3FORMS_KEY && (
+    web3formsKey && (
       <>
-        <input type="hidden" name="access_key" value={WEB3FORMS_KEY} />
+        <input type="hidden" name="access_key" value={web3formsKey} />
         <input type="hidden" name="from_name" value={`${brand.shortName} Website`} />
-        <input type="hidden" name="subject" value={ui.form.subject} />
+        <input type="hidden" name="subject" value={en.ui.form.subject} />
+        <input type="hidden" name="language" value={lang === 'ar' ? 'Arabic' : 'English'} />
       </>
     )
   }
@@ -122,7 +128,7 @@ const email = SITE.contact.email;
       data.delete('website');
       data.set('phone', withCountryCode(String(data.get('phone') ?? '').trim()));
       const solutionLabel = select?.value ? select.selectedOptions[0].text : '';
-      if (solutionLabel) data.set('solution', solutionLabel);
+      const solutionEn = select?.value ? (JSON.parse(d.solutionNamesEn ?? '{}') as Record<string, string>)[select.value] ?? solutionLabel : '';
       const subject = `${d.subject}${solutionLabel ? ` – ${solutionLabel}` : ''}`;
 
       if (!endpoint) {
@@ -141,13 +147,17 @@ const email = SITE.contact.email;
         return;
       }
 
-      if (data.has('subject')) data.set('subject', subject);
+      // Inbox copy: solution and subject in English.
+      if (solutionEn) data.set('solution', solutionEn);
+      if (data.has('subject')) data.set('subject', `${d.subjectEn}${solutionEn ? ` – ${solutionEn}` : ''}`);
       submitBtn.disabled = true;
       submitBtn.setAttribute('aria-disabled', 'true');
       showStatus('info', d.msgSending ?? '');
       try {
         const response = await fetch(endpoint, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        // Web3Forms answers { success: true | false, message }.
+        const result = (await response.json().catch(() => ({}))) as { success?: boolean };
+        if (!response.ok || result.success === false) throw new Error(`HTTP ${response.status}`);
         form.reset();
         showStatus('success', d.msgSuccess ?? '');
       } catch {

@@ -2,8 +2,8 @@
 /**
  * Josoorkom gate: every link to the Josoorkom platform (SITE.josoorkomUrl)
  * opens this dialog first. The visitor gives name, surname, mobile and email;
- * on submit the details are POSTed to Web3Forms or PUBLIC_FORM_ENDPOINT (when
- * set — lib/form-endpoint.ts) and the visitor continues to the platform in the
+ * on submit the details are POSTed to Web3Forms with the pop-up's own access
+ * key (lib/form-endpoint.ts) and the visitor continues to the platform in the
  * same tab. Without JavaScript the links simply go to the platform.
  */
 import Button from '@/components/ui/Button.astro';
@@ -12,11 +12,11 @@ import Icon from '@/components/ui/Icon.astro';
 import IconTile from '@/components/ui/IconTile.astro';
 import { getContent } from '@/data';
 import { SITE } from '@/data/site';
-import { FORM_ENDPOINT, WEB3FORMS_KEY } from '@/lib/form-endpoint';
+import { formTarget } from '@/lib/form-endpoint';
 
-const { brand, ui } = getContent(Astro.url);
+const { brand, ui, lang } = getContent(Astro.url);
 const t = ui.josoorkom;
-const endpoint = FORM_ENDPOINT;
+const { endpoint, web3formsKey } = formTarget('josoorkom');
 ---
 
 <dialog class="jd" aria-labelledby="jd-title" aria-describedby="jd-text" data-josoorkom-dialog data-url={SITE.josoorkomUrl} data-lenis-prevent>
@@ -46,11 +46,12 @@ const endpoint = FORM_ENDPOINT;
     >
       <input type="hidden" name="formType" value="Josoorkom visit" />
       {
-        WEB3FORMS_KEY && (
+        web3formsKey && (
           <>
-            <input type="hidden" name="access_key" value={WEB3FORMS_KEY} />
+            <input type="hidden" name="access_key" value={web3formsKey} />
             <input type="hidden" name="from_name" value={`${brand.shortName} Website`} />
             <input type="hidden" name="subject" value="Josoorkom visit — new visitor details" />
+            <input type="hidden" name="language" value={lang === 'ar' ? 'Arabic' : 'English'} />
           </>
         )
       }

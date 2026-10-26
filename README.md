@@ -31,8 +31,7 @@ output `dist`), installs the packages itself and redeploys on every push to `mai
 `.gitignore` keeps `node_modules`, `dist`, `.astro`, `.env` and `src/uploads` out of
 the repository.
 
-Add `PUBLIC_WEB3FORMS_ACCESS_KEY` under Project → Settings → Environment Variables
-if the forms should send email (see "Forms"), then redeploy.
+The forms need no Vercel settings — their Web3Forms keys are in the code (see "Forms").
 
 **Without Git:** `npm run deploy:zip` writes `../gulf-asco-website-deploy.zip`
 (source only, ~20 MB) for Vercel Drop — never drop the whole folder: `node_modules`
@@ -129,27 +128,29 @@ landmarks and a single `h1` per page. The production domain is set in
 
 ## Forms
 
-The Contact enquiry form and the Josoorkom dialog are sent wherever
-`src/lib/form-endpoint.ts` points, set by environment variables (see
-`.env.example`; on Vercel add them under Project → Settings → Environment
-Variables and redeploy):
+Both forms send through **Web3Forms**, each with its own access key (set in
+`src/data/site.ts` → `SITE.forms`, wired in `src/lib/form-endpoint.ts`). Web3Forms
+emails every submission to the address its key was created for.
 
-- `PUBLIC_WEB3FORMS_ACCESS_KEY` — a Web3Forms access key. The forms post to the
-  Web3Forms API with the key, a subject and a sender name; Web3Forms emails each
-  submission to the address the key was created for (the Josoorkom dialog
-  arrives with the subject "Josoorkom visit").
-- `PUBLIC_FORM_ENDPOINT` — any other URL that accepts a FormData POST
-  (Formspree, a serverless function…). Takes priority if both are set.
+| Form | Where | Key | Inbox subject |
+| --- | --- | --- | --- |
+| Enquiry form | Contact page and the six solution pages (Josoorkom shows a contact card instead) | `enquiryKey` | "Website enquiry – &lt;solution&gt;" |
+| Josoorkom pop-up | Opens from every Josoorkom platform link, then continues to the platform | `josoorkomKey` | "Josoorkom visit — new visitor details" |
 
-With neither, the enquiry form opens the visitor's email app addressed to
-info@gulfasco.com, and the Josoorkom dialog continues to the platform without
-storing the details. Links like `/contact/?solution=lighting#enquiry` preselect
-"Solution of Interest".
+Inbox emails are always in English (subject and solution name) and include a
+`language` field showing whether the visitor used the English or Arabic site.
+Phone numbers typed without a country code get +966.
 
-**info@gulfasco.com is on Microsoft 365.** If the Web3Forms access-key email or
-submissions don't arrive, check Junk and the Microsoft 365 quarantine
-(security.microsoft.com/quarantine), and add `web3forms.com` as a safe sender
-(or an allow rule in the Exchange admin centre).
+Access keys are public by design (they appear in the page HTML and can only
+deliver to their own inbox), so they live in the code. To swap a key without
+editing code, set `PUBLIC_WEB3FORMS_ENQUIRY_KEY` / `PUBLIC_WEB3FORMS_JOSOORKOM_KEY`
+(`.env` or Vercel environment variables, then redeploy). `PUBLIC_FORM_ENDPOINT`
+sends both forms to another FormData endpoint instead. Links like
+`/contact/?solution=lighting#enquiry` preselect "Solution of Interest".
+
+**info@gulfasco.com is on Microsoft 365.** If submissions don't arrive, check
+Junk and the Microsoft 365 quarantine (security.microsoft.com/quarantine), and
+add `web3forms.com` as a safe sender (or an allow rule in the Exchange admin centre).
 
 ## Waiting on the client
 

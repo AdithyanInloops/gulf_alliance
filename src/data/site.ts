@@ -16,15 +16,21 @@ export const SITE = {
     email: 'info@gulfasco.com',
     emailHref: 'mailto:info@gulfasco.com',
     /**
-     * Map pin for the "open in maps" links and the embedded map. Coordinates,
-     * not an address search: the Google Maps app on phones re-runs a text search
-     * near the phone's own location and can land on another "Olaya" (Riyadh),
-     * while a pin opens in the same place on every device.
-     * TODO(client): currently the Olaya district of Al Khobar (the street is not
-     * on public maps). For the exact office, long-press it in Google Maps and
-     * paste the two numbers shown here.
+     * Where the "open in maps" links and the embedded map point. A Google place
+     * ID, not an address search: the Google Maps app on phones re-runs a text
+     * search near the phone's own location and can land somewhere else, while a
+     * place ID opens the same named place on every device. `geo` is that place's
+     * centre, used for the embedded map's pin.
+     * Currently the Olaya district of Al Khobar (the office street is not on
+     * Google as a searchable address). TODO(client): once the company has a
+     * Google Business Profile, put its name and place ID here so the link opens
+     * the company itself.
      */
-    geo: { lat: 26.29772, lng: 50.17748 },
+    map: {
+      name: 'Olaya, Al Khobar, Saudi Arabia',
+      placeId: 'ChIJf80b79PnST4RPJEovT-1ngw',
+      geo: { lat: 26.298007, lng: 50.178626 },
+    },
     /** Structured address for search engines (JSON-LD). */
     postal: {
       streetAddress: 'Al Fadhl Ibn Ismail, Olaya Dist.',
@@ -66,11 +72,11 @@ export const SITE = {
   ] as { label: string; href: string; icon: 'linkedin' | 'instagram' | 'x-social' | 'facebook' | 'youtube' }[],
 } as const;
 
-const pin = `${SITE.contact.geo.lat},${SITE.contact.geo.lng}`;
-/** Opens the pin in the Google Maps app (phones) or google.com/maps (desktop). */
-export const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${pin}`;
-/** The same pin for the embedded map on the Contact page. */
-export const mapEmbedUrl = (lang: string) => `https://www.google.com/maps?q=${pin}&z=15&hl=${lang}&output=embed`;
+const { map } = SITE.contact;
+/** Opens the place in the Google Maps app (phones) or google.com/maps (desktop). */
+export const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(map.name)}&query_place_id=${map.placeId}`;
+/** A pin on the same place for the embedded map on the Contact page. */
+export const mapEmbedUrl = (lang: string) => `https://www.google.com/maps?q=${map.geo.lat},${map.geo.lng}&z=15&hl=${lang}&output=embed`;
 
 export const whatsappUrl = (message: string) =>
   `https://wa.me/${SITE.contact.whatsapp}?text=${encodeURIComponent(message)}`;

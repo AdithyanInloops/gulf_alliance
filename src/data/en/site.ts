@@ -48,6 +48,7 @@ export const UI = {
   mobileNav: 'Mobile',
   menuOpen: 'Open menu',
   menuClose: 'Close menu',
+  close: 'Close',
   solutionsMenu: 'Show the Solutions menu',
   language: 'Language',
   breadcrumb: 'Breadcrumb',

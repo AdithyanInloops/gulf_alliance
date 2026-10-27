@@ -49,6 +49,7 @@ export const UI: typeof EN_UI = {
   mobileNav: 'قائمة الجوال',
   menuOpen: 'فتح القائمة',
   menuClose: 'إغلاق القائمة',
+  close: 'إغلاق',
   solutionsMenu: 'عرض قائمة الحلول',
   language: 'اللغة',
   breadcrumb: 'مسار التنقل',

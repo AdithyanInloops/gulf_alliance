@@ -4,10 +4,14 @@
  * contact strip on the left; the enquiry form (solution preselected) — or,
  * for Josoorkom, a contact card — on the right.
  *   tone="navy"  dark section (most pages)   tone="light"  light-blue section
+ * The CTA button brings the form forward: side by side (wide screens) the form
+ * slides to the middle of the section over the dimmed copy; stacked, the page
+ * scrolls to it and it pulses. Either way the first field gets focus.
  */
 import Button from '@/components/ui/Button.astro';
 import Icon from '@/components/ui/Icon.astro';
 import IconTile from '@/components/ui/IconTile.astro';
+import KeepHyphenated from '@/components/ui/KeepHyphenated.astro';
 import { getContent } from '@/data';
 import { SITE } from '@/data/site';
 import type { ContactItem, Solution } from '@/data/types';
@@ -33,15 +37,23 @@ const dark = tone === 'navy';
   class:list={['sc', `sc--${tone}`]}
   id="enquire"
   data-tone={dark ? 'dark' : undefined}
+  data-form-section={contactCard ? undefined : ''}
   aria-labelledby="solution-cta-title"
 >
   {dark && <DarkBackdrop />}
   <div class="container sc__inner">
-    <div class="sc__copy" data-reveal>
-      <h2 id="solution-cta-title" class="sc__title">{finalCta.title}</h2>
+    <div class="sc__copy" data-reveal data-form-copy>
+      <h2 id="solution-cta-title" class="sc__title"><KeepHyphenated text={finalCta.title} /></h2>
       <p class="sc__text">{finalCta.text}</p>
       <div class="sc__actions">
-        <Button href={contactCard ? finalCta.cta.href : '#enquiry-form'} external={finalCta.cta.external} variant="gold" size="lg" icon={finalCta.cta.external ? 'square-arrow-out-up-right' : 'send'}>
+        <Button
+          href={contactCard ? finalCta.cta.href : '#enquiry-form'}
+          external={finalCta.cta.external}
+          variant="gold"
+          size="lg"
+          icon={finalCta.cta.external ? 'square-arrow-out-up-right' : 'send'}
+          data-form-focus={contactCard ? undefined : ''}
+        >
           {finalCta.cta.label}
         </Button>
         <a href={SITE.contact.phoneHref} class="sc__phone"><Icon name="phone" size={20} /><span class="ltr">{SITE.contact.phoneDisplay}</span></a>
@@ -85,7 +97,11 @@ const dark = tone === 'navy';
           </a>
         </div>
       ) : (
-        <div class="sc__card" data-reveal>
+        <div class="sc__card" data-reveal data-form-card>
+          <button type="button" class="sc__close" data-form-close>
+            <Icon name="x" size={20} strokeWidth={2.4} />
+            <span class="visually-hidden">{ui.close}</span>
+          </button>
           <h3 class="sc__card-title">{form.title}</h3>
           <p class="sc__card-text">{form.text}</p>
           <EnquiryForm solution={solution.slug} />
@@ -94,6 +110,69 @@ const dark = tone === 'navy';
     }
   </div>
 </section>
+
+<script>
+  import { scrollToElement } from '@/scripts/smooth-scroll';
+
+  document.querySelectorAll<HTMLElement>('[data-form-section]').forEach((section) => {
+    const trigger = section.querySelector<HTMLAnchorElement>('[data-form-focus]');
+    const card = section.querySelector<HTMLElement>('[data-form-card]');
+    const copy = section.querySelector<HTMLElement>('[data-form-copy]');
+    const closeBtn = section.querySelector<HTMLButtonElement>('[data-form-close]');
+    const inner = section.querySelector<HTMLElement>('.sc__inner');
+    if (!trigger || !card || !copy || !closeBtn || !inner) return;
+
+    const sideBySide = window.matchMedia('(min-width: 1000px)');
+    const firstField = () => card.querySelector<HTMLElement>('.field__control');
+    const focusFirst = (delay: number) => window.setTimeout(() => firstField()?.focus({ preventScroll: true }), delay);
+    const isOpen = () => section.classList.contains('is-form-focus');
+    let offset = 0;
+
+    // Shift the card so its centre sits on the centre of the section's content.
+    const place = () => {
+      const c = card.getBoundingClientRect();
+      const box = inner.getBoundingClientRect();
+      offset = box.left + box.width / 2 - (c.left - offset + c.width / 2);
+      card.style.setProperty('--focus-x', `${offset}px`);
+    };
+    const open = () => {
+      offset = 0;
+      place();
+      section.classList.add('is-form-focus');
+      copy.inert = true;
+      scrollToElement(card);
+      focusFirst(500);
+    };
+    const close = (returnFocus = false) => {
+      if (!isOpen()) return;
+      section.classList.remove('is-form-focus');
+      copy.inert = false;
+      if (returnFocus) trigger.focus({ preventScroll: true });
+    };
+
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      // Stop here, so the smooth-scroll anchor handling doesn't also jump to #enquiry-form.
+      event.stopPropagation();
+      if (sideBySide.matches) {
+        open();
+        return;
+      }
+      scrollToElement(card);
+      card.classList.remove('is-pulse');
+      void card.offsetWidth; // restart the pulse animation
+      card.classList.add('is-pulse');
+      focusFirst(700);
+    });
+    closeBtn.addEventListener('click', () => close(true));
+    document.addEventListener('keydown', (event) => event.key === 'Escape' && close(true));
+    document.addEventListener('click', (event) => {
+      if (isOpen() && !card.contains(event.target as Node)) close();
+    });
+    window.addEventListener('resize', () => isOpen() && place(), { passive: true });
+    sideBySide.addEventListener('change', () => close());
+  });
+</script>
 
 <style>
   .sc {
@@ -161,6 +240,47 @@ const dark = tone === 'navy';
     --border: #e3e9f5;
   }
   .sc__card-title { font-size: 1.6rem; color: var(--color-navy-950); }
+
+  /* Form brought forward by the CTA (see the script) ----------------------------- */
+  .sc__copy { transition: opacity 0.45s var(--ease), filter 0.45s var(--ease); }
+  .sc__card[data-form-card] {
+    position: relative;
+    transition: transform 0.7s var(--ease), box-shadow 0.5s var(--ease);
+  }
+  .sc.is-form-focus .sc__copy { opacity: 0.15; filter: blur(3px); }
+  .sc.is-form-focus .sc__card[data-form-card] {
+    z-index: 2;
+    transform: translateX(var(--focus-x, 0px)) scale(1.02);
+    box-shadow: 0 0 0 2px var(--color-gold-500), 0 50px 100px -36px rgb(0 0 0 / 0.6);
+  }
+  .sc__close {
+    position: absolute;
+    top: -16px;
+    inset-inline-end: -16px;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--color-gold-500);
+    color: var(--color-navy-950);
+    box-shadow: 0 10px 24px -10px rgb(0 0 0 / 0.5);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.6);
+    transition: opacity 0.3s var(--ease), transform 0.4s var(--ease), visibility 0s linear 0.3s;
+  }
+  .sc.is-form-focus .sc__close { opacity: 1; visibility: visible; transform: none; transition-delay: 0.35s, 0.35s, 0s; }
+  .sc__close:hover { background: var(--color-gold-400); }
+
+  /* Stacked layout: the card pulses once when the CTA scrolls to it. */
+  .sc__card.is-pulse { animation: sc-pulse 1.4s var(--ease) 0.35s; }
+  @keyframes sc-pulse {
+    0% { box-shadow: var(--shadow-lg), 0 0 0 0 rgb(248 184 77 / 0.75); }
+    100% { box-shadow: var(--shadow-lg), 0 0 0 18px rgb(248 184 77 / 0); }
+  }
   .sc__card-text { margin: 8px 0 22px; font-size: var(--fs-small); line-height: 1.55; color: var(--color-ink); }
 
   .sc__card--contact {

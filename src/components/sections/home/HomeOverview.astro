@@ -25,8 +25,8 @@ const paragraphs = Array.isArray(overview.text) ? overview.text : [overview.text
       <div class="ov__caption">
         <span class="ov__caption-icon"><Icon name="handshake" size={24} strokeWidth={1.8} /></span>
         <div class="ov__caption-body">
-          <p class="ov__caption-title">{brand.name}</p>
-          <p class="ov__caption-text">{brand.tagline}</p>
+          <p class="ov__caption-title" data-fit>{brand.name}</p>
+          <p class="ov__caption-text" data-fit>{brand.tagline}</p>
         </div>
       </div>
       <span class="ov__dots" aria-hidden="true"></span>
@@ -102,23 +102,24 @@ const paragraphs = Array.isArray(overview.text) ? overview.text : [overview.text
   .ov__caption-title {
     font-family: var(--font-display);
     font-size: 0.85rem;
-    font-size: min(1rem, 6.1cqi);
+    font-size: min(1rem, 5.8cqi);
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--color-navy-950);
   }
-  /* The tagline too: one line, shrinking only when the card is narrow. */
+  /* The tagline too: one line, shrinking when the card is narrow (with room to
+     spare; data-fit shrinks it further on any device where it still overflows). */
   .ov__caption-text {
     margin-top: 2px;
-    font-size: min(var(--fs-xs), 5.4cqi);
+    font-size: min(var(--fs-xs), 4.9cqi);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--color-ink);
   }
-  :global(html[lang='ar']) .ov__caption-text { font-size: min(var(--fs-xs), 7.8cqi); }
+  :global(html[lang='ar']) .ov__caption-text { font-size: min(var(--fs-xs), 7cqi); }
 
   .ov__content h2 { color: var(--color-navy-950); }
   .ov__text { margin-top: 18px; font-size: var(--fs-body); line-height: 1.75; color: var(--color-ink); }
@@ -163,5 +164,7 @@ const paragraphs = Array.isArray(overview.text) ? overview.text : [overview.text
     /* A wider card on phones leaves the name more room. */
     .ov__caption { inset-inline: 14px; gap: 12px; padding: 12px 14px; }
     .ov__caption-icon { width: 42px; height: 42px; }
+    .ov__caption-text { font-size: min(0.75rem, 4.9cqi); }
+    :global(html[lang='ar']) .ov__caption-text { font-size: min(0.8125rem, 7cqi); }
   }
 </style>

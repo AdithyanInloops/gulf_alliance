@@ -14,7 +14,7 @@ const { brand, nav, footer, solutions, ui, R } = getContent(Astro.url);
     <div class="footer__grid">
       <div class="footer__brand">
         <Logo variant="footer" />
-        <p class="footer__tagline">{brand.tagline}</p>
+        <p class="footer__tagline" data-fit>{brand.tagline}</p>
         <p class="footer__desc">{brand.description}</p>
         {
           SITE.social.length > 0 && (
@@ -167,12 +167,15 @@ const { brand, nav, footer, solutions, ui, R } = getContent(Astro.url);
     .footer__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     /* Tablet and phone: the tagline stays on one line, scaled to the column (cqi). */
     .footer__brand { container-type: inline-size; }
-    .footer__tagline { font-size: min(1.05rem, 5cqi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    :global(html[lang='ar']) .footer__tagline { font-size: min(1.05rem, 7.4cqi); }
+    .footer__tagline { font-size: min(1.05rem, 4.5cqi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    :global(html[lang='ar']) .footer__tagline { font-size: min(1.05rem, 6.7cqi); }
   }
   @media (max-width: 599px) {
     .footer__grid { grid-template-columns: minmax(0, 1fr); }
     /* Leave room for the WhatsApp button. */
     .footer__bottom { padding-bottom: 88px; }
+    /* Phones: a smaller tagline, with room to spare (data-fit covers the rest). */
+    .footer__tagline { font-size: min(0.95rem, 4.5cqi); }
+    :global(html[lang='ar']) .footer__tagline { font-size: min(0.95rem, 6.7cqi); }
   }
 </style>

@@ -330,7 +330,10 @@ export const SOLUTIONS: Solution[] = [
       hero: {
         title: 'منصة تعلّم رقمي للطلاب',
         text: 'جسوركم منصة تعليم إلكتروني تركّز على الطلاب والتعلّم الرقمي. استكشف المنصة للتعرّف على هدفها، واكتشاف ميزاتها المتاحة، ومعرفة المزيد عن فرص التعلّم التي توفرها.',
-        ctas: [{ label: 'استكشف جسوركم', href: '#overview' }],
+        ctas: [
+          { label: 'زُر جسوركم', href: SITE.josoorkomUrl, external: true },
+          { label: 'استكشف جسوركم', href: '#overview' },
+        ],
       },
       overview: {
         eyebrow: 'نظرة عامة على المنصة',
@@ -354,7 +357,7 @@ export const SOLUTIONS: Solution[] = [
       finalCta: {
         title: 'اكتشف جسوركم',
         text: 'استكشف جسوركم لمعرفة المزيد عن بيئة التعلّم الرقمي فيها والمصادر المتاحة للطلاب. تفضّل بزيارة المنصة للتعرّف على ميزاتها واكتشاف كيف يمكن أن تدعم احتياجاتك التعليمية.',
-        cta: { label: 'زُر جسوركم', href: SITE.josoorkomUrl, external: true },
+        cta: { label: 'استفسر عن جسوركم', href: R.enquiry('josoorkom') },
       },
     },
   },

@@ -333,7 +333,10 @@ export const SOLUTIONS: Solution[] = [
       hero: {
         title: 'A Digital Learning Platform for Students',
         text: 'Josoorkom is an e-learning platform focused on students and digital learning. Explore the platform to understand its purpose, discover its available features, and learn more about the learning opportunities it provides.',
-        ctas: [{ label: 'Explore Josoorkom', href: '#overview' }],
+        ctas: [
+          { label: 'Visit Josoorkom', href: SITE.josoorkomUrl, external: true },
+          { label: 'Explore Josoorkom', href: '#overview' },
+        ],
       },
       overview: {
         eyebrow: 'Platform Overview',
@@ -357,7 +360,7 @@ export const SOLUTIONS: Solution[] = [
       finalCta: {
         title: 'Discover Josoorkom',
         text: 'Explore Josoorkom to learn more about its digital learning environment and the resources available to students. Visit the platform to understand its features and discover how it may support your educational needs.',
-        cta: { label: 'Visit Josoorkom', href: SITE.josoorkomUrl, external: true },
+        cta: { label: 'Enquire About Josoorkom', href: R.enquiry('josoorkom') },
       },
     },
   },

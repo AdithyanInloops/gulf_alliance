@@ -24,7 +24,7 @@ const paragraphs = Array.isArray(overview.text) ? overview.text : [overview.text
       <Photo src={PHOTOS.homeOverview} alt={brand.name} ratio="3 / 2" radius="xl" sizes="(min-width: 1000px) 600px, 100vw" />
       <div class="ov__caption">
         <span class="ov__caption-icon"><Icon name="handshake" size={24} strokeWidth={1.8} /></span>
-        <div>
+        <div class="ov__caption-body">
           <p class="ov__caption-title">{brand.name}</p>
           <p class="ov__caption-text">{brand.tagline}</p>
         </div>
@@ -97,7 +97,18 @@ const paragraphs = Array.isArray(overview.text) ? overview.text : [overview.text
     background: var(--color-navy-900);
     color: var(--color-gold-500);
   }
-  .ov__caption-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--color-navy-950); }
+  /* The company name stays on one line: it scales with the card (cqi) up to 1rem. */
+  .ov__caption-body { flex: 1; min-width: 0; container-type: inline-size; }
+  .ov__caption-title {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-size: min(1rem, 6.1cqi);
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-navy-950);
+  }
   .ov__caption-text { margin-top: 2px; font-size: var(--fs-xs); color: var(--color-ink); }
 
   .ov__content h2 { color: var(--color-navy-950); }
@@ -140,5 +151,8 @@ const paragraphs = Array.isArray(overview.text) ? overview.text : [overview.text
   }
   @media (max-width: 479px) {
     .ov__list { grid-template-columns: minmax(0, 1fr); }
+    /* A wider card on phones leaves the name more room. */
+    .ov__caption { inset-inline: 14px; gap: 12px; padding: 12px 14px; }
+    .ov__caption-icon { width: 42px; height: 42px; }
   }
 </style>

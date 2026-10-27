@@ -15,8 +15,16 @@ export const SITE = {
     whatsapp: '966545111301',
     email: 'info@gulfasco.com',
     emailHref: 'mailto:info@gulfasco.com',
-    /** Used for the embedded map and the "open in maps" link. */
-    mapQuery: 'Al Fadhl Ibn Ismail, Olaya, Al Khobar, Saudi Arabia',
+    /**
+     * Map pin for the "open in maps" links and the embedded map. Coordinates,
+     * not an address search: the Google Maps app on phones re-runs a text search
+     * near the phone's own location and can land on another "Olaya" (Riyadh),
+     * while a pin opens in the same place on every device.
+     * TODO(client): currently the Olaya district of Al Khobar (the street is not
+     * on public maps). For the exact office, long-press it in Google Maps and
+     * paste the two numbers shown here.
+     */
+    geo: { lat: 26.29772, lng: 50.17748 },
     /** Structured address for search engines (JSON-LD). */
     postal: {
       streetAddress: 'Al Fadhl Ibn Ismail, Olaya Dist.',
@@ -58,7 +66,11 @@ export const SITE = {
   ] as { label: string; href: string; icon: 'linkedin' | 'instagram' | 'x-social' | 'facebook' | 'youtube' }[],
 } as const;
 
-export const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(SITE.contact.mapQuery)}`;
+const pin = `${SITE.contact.geo.lat},${SITE.contact.geo.lng}`;
+/** Opens the pin in the Google Maps app (phones) or google.com/maps (desktop). */
+export const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${pin}`;
+/** The same pin for the embedded map on the Contact page. */
+export const mapEmbedUrl = (lang: string) => `https://www.google.com/maps?q=${pin}&z=15&hl=${lang}&output=embed`;
 
 export const whatsappUrl = (message: string) =>
   `https://wa.me/${SITE.contact.whatsapp}?text=${encodeURIComponent(message)}`;

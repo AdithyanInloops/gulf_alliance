@@ -8,13 +8,12 @@ import Icon from '@/components/ui/Icon.astro';
 import IconTile from '@/components/ui/IconTile.astro';
 import Section from '@/components/ui/Section.astro';
 import { getContent } from '@/data';
-import { mapsUrl, SITE } from '@/data/site';
+import { mapEmbedUrl, mapsUrl } from '@/data/site';
 import EnquiryForm from '@/components/sections/shared/EnquiryForm.astro';
 
 const { contact, brand, ui, lang } = getContent(Astro.url);
 const { info, form } = contact;
-const query = encodeURIComponent(SITE.contact.mapQuery);
-const mapEmbed = `https://www.google.com/maps?q=${query}&z=14&hl=${lang}&output=embed`;
+const mapEmbed = mapEmbedUrl(lang);
 const iconFor = { phone: 'phone', email: 'mail', address: 'building-2' } as const;
 // Address first, then phone and email (as designed).
 const rows = ['address', 'phone', 'email'].map((key) => info.items.find((i) => i.key === key)!);

@@ -57,19 +57,17 @@ export const SITE = {
     josoorkomKey: 'e764c457-b3ba-446f-a0c7-c62fc97925c4',
   },
   /**
-   * Social profiles, shown as icons in the footer ("Follow Us").
-   * TODO(client): paste each profile URL into `href`, e.g.
-   *   'https://www.linkedin.com/company/…', 'https://x.com/…', 'https://www.instagram.com/…'
-   * Until an `href` is set, its icon shows but is not a link. Delete an entry
-   * to hide a platform the company doesn't use.
+   * Social profiles (from the client), shown as icons in the footer ("Follow
+   * Us") and listed for search engines (Organization `sameAs`). An entry with
+   * an empty `href` shows its icon without a link; delete an entry to hide it.
+   * Available icons also include 'x-social' and 'youtube'.
    */
   social: [
-    { label: 'LinkedIn', href: '', icon: 'linkedin' },
-    { label: 'X', href: '', icon: 'x-social' },
-    { label: 'Instagram', href: '', icon: 'instagram' },
-    { label: 'Facebook', href: '', icon: 'facebook' },
-    { label: 'YouTube', href: '', icon: 'youtube' },
-  ] as { label: string; href: string; icon: 'linkedin' | 'instagram' | 'x-social' | 'facebook' | 'youtube' }[],
+    { label: 'TikTok', href: 'https://www.tiktok.com/@gulfasco', icon: 'tiktok' },
+    { label: 'Instagram', href: 'https://www.instagram.com/gulfasco.sa/', icon: 'instagram' },
+    { label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61595180615184', icon: 'facebook' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/gulf-alliance-solutions-co-9a57a0446', icon: 'linkedin' },
+  ] as { label: string; href: string; icon: 'linkedin' | 'instagram' | 'x-social' | 'facebook' | 'youtube' | 'tiktok' }[],
 } as const;
 
 const { map } = SITE.contact;

@@ -4,6 +4,7 @@
  * The default slot renders actions (buttons) under the text.
  */
 import Eyebrow from './Eyebrow.astro';
+import KeepHyphenated from './KeepHyphenated.astro';
 import type { IconName } from './icons';
 
 interface Props {
@@ -39,7 +40,7 @@ const paragraphs = text ? (Array.isArray(text) ? text : [text]) : [];
 
 <div class:list={['sh', `sh--${align}`, `sh--${width}`, className]} data-reveal {...rest}>
   {eyebrow && <Eyebrow variant={eyebrowVariant} icon={eyebrowIcon}>{eyebrow}</Eyebrow>}
-  <Tag id={id} class="sh__title">{title}</Tag>
+  <Tag id={id} class="sh__title"><KeepHyphenated text={title} /></Tag>
   {paragraphs.map((p) => <p class="sh__text">{p}</p>)}
   {
     Astro.slots.has('default') && (

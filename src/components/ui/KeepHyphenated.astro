@@ -1,0 +1,14 @@
+---
+/**
+ * Renders `text` so hyphenated words (E-Commerce, E-Learning, Customer-Focused)
+ * never break at the hyphen: each one is wrapped in a no-wrap span. Used for
+ * headings.
+ */
+interface Props {
+  text: string;
+}
+
+const parts = Astro.props.text.split(/(\S+-\S+)/);
+---
+
+{parts.map((part, i) => (i % 2 ? <span class="nowrap">{part}</span> : part))}

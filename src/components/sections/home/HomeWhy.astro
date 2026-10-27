@@ -1,6 +1,7 @@
 ---
 /** Home › Why Choose Us: centred heading, four numbered cards. */
 import IconTile from '@/components/ui/IconTile.astro';
+import KeepHyphenated from '@/components/ui/KeepHyphenated.astro';
 import Section from '@/components/ui/Section.astro';
 import SectionHeading from '@/components/ui/SectionHeading.astro';
 import { getContent } from '@/data';
@@ -18,7 +19,7 @@ const { why } = getContent(Astro.url).home;
             <IconTile icon={item.icon} variant="light-orange" size="lg" />
             <span class="why__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
           </div>
-          <h3 class="why__title">{item.title}</h3>
+          <h3 class="why__title"><KeepHyphenated text={item.title} /></h3>
           <p class="why__text">{item.text}</p>
         </li>
       ))

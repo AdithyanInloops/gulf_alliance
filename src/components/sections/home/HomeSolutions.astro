@@ -13,6 +13,7 @@ import Button from '@/components/ui/Button.astro';
 import CheckList from '@/components/ui/CheckList.astro';
 import Eyebrow from '@/components/ui/Eyebrow.astro';
 import Icon from '@/components/ui/Icon.astro';
+import KeepHyphenated from '@/components/ui/KeepHyphenated.astro';
 import Section from '@/components/ui/Section.astro';
 import { findSolution, getContent } from '@/data';
 import { SOLUTION_BLOCK_PHOTOS } from '@/data/media';
@@ -75,7 +76,7 @@ const josoorkom = findSolution(all, 'josoorkom');
     </div>
     <div class="hs__banner-copy">
       <span class="hs__banner-pill"><Icon name="graduation-cap" size={16} strokeWidth={2} />{josoorkom.name}</span>
-      <h3 class="hs__banner-title">{josoorkom.overviewCard.title}</h3>
+      <h3 class="hs__banner-title"><KeepHyphenated text={josoorkom.overviewCard.title} /></h3>
       <p class="hs__banner-text">{josoorkom.overviewCard.text}</p>
       <Button href={R.solution('josoorkom')} variant="gold" size="lg">{josoorkom.overviewCard.cta}</Button>
     </div>

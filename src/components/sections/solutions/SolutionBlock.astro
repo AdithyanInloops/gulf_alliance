@@ -9,6 +9,7 @@ import Badge from '@/components/ui/Badge.astro';
 import Button from '@/components/ui/Button.astro';
 import CheckList from '@/components/ui/CheckList.astro';
 import Icon from '@/components/ui/Icon.astro';
+import KeepHyphenated from '@/components/ui/KeepHyphenated.astro';
 import Photo from '@/components/ui/Photo.astro';
 import { getContent } from '@/data';
 import { SOLUTION_BLOCK_PHOTOS } from '@/data/media';
@@ -29,7 +30,7 @@ const link = s.page.finalCta.cta;
 <article class:list={['sb', { 'sb--reverse': reverse }]} id={`area-${s.slug}`} aria-labelledby={`area-${s.slug}-title`} data-reveal>
   <div class="sb__copy">
     <Badge tone={tone}>{`${String(index + 1).padStart(2, '0')} — ${s.shortName}`}</Badge>
-    <h2 id={`area-${s.slug}-title`} class="sb__title">{s.overviewCard.title}</h2>
+    <h2 id={`area-${s.slug}-title`} class="sb__title"><KeepHyphenated text={s.overviewCard.title} /></h2>
     <p class="sb__text">{s.overviewCard.text}</p>
     <div class="sb__box">
       <CheckList items={s.page.items.map((i) => i.title)} columns={2} strong />

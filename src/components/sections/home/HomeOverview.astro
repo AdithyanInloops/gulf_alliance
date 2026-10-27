@@ -109,7 +109,16 @@ const paragraphs = Array.isArray(overview.text) ? overview.text : [overview.text
     text-overflow: ellipsis;
     color: var(--color-navy-950);
   }
-  .ov__caption-text { margin-top: 2px; font-size: var(--fs-xs); color: var(--color-ink); }
+  /* The tagline too: one line, shrinking only when the card is narrow. */
+  .ov__caption-text {
+    margin-top: 2px;
+    font-size: min(var(--fs-xs), 5.4cqi);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-ink);
+  }
+  :global(html[lang='ar']) .ov__caption-text { font-size: min(var(--fs-xs), 7.8cqi); }
 
   .ov__content h2 { color: var(--color-navy-950); }
   .ov__text { margin-top: 18px; font-size: var(--fs-body); line-height: 1.75; color: var(--color-ink); }

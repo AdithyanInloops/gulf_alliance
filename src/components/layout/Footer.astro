@@ -165,6 +165,10 @@ const { brand, nav, footer, solutions, ui, R } = getContent(Astro.url);
 
   @media (max-width: 1023px) {
     .footer__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* Tablet and phone: the tagline stays on one line, scaled to the column (cqi). */
+    .footer__brand { container-type: inline-size; }
+    .footer__tagline { font-size: min(1.05rem, 5cqi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    :global(html[lang='ar']) .footer__tagline { font-size: min(1.05rem, 7.4cqi); }
   }
   @media (max-width: 599px) {
     .footer__grid { grid-template-columns: minmax(0, 1fr); }

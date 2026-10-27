@@ -5,10 +5,14 @@
  *   apple-touch-icon.png (180, mark on white — iOS fills transparency black)
  *   logo.png (stacked logo on white, 600×600 — used in JSON-LD)
  *   og-default.png (1200×630 social share image)
- * and, next to the client's files, light versions for navy backgrounds —
- * wordmark in white, the mark's blues brightened, gold untouched:
- *   logo-horizontal-light.png (header while the mobile menu is open)
- *   logo-stacked-light.png    (footer)
+ * and, next to the client's files:
+ *   logo-header.png  the horizontal logo recomposed with the name enlarged
+ *                    (in the original it is a third of the mark's height,
+ *                    too small to read in the header)
+ * plus light versions for navy backgrounds — name in white, the mark's blues
+ * brightened, gold untouched:
+ *   logo-header-light.png   (header while the mobile menu is open)
+ *   logo-stacked-light.png  (footer)
  *
  * Run with `npm run assets` after replacing the logo files.
  */
@@ -68,6 +72,26 @@ await sharp(Buffer.from(bg))
   .toFile(`${out}og-default.png`);
 console.log('✓ og-default.png');
 
+// Header logo: the same mark, the name at 60% of its height --------------------------
+// In logo-horizontal.png (1641×493) the mark spans x 0–536 and the two-line name
+// x 579–1638, y 175–350.
+const MARK_BOX = { left: 0, top: 0, width: 540, height: 493 };
+const NAME_BOX = { left: 576, top: 172, width: 1065, height: 182 };
+const NAME_GAP = 46;
+const nameHeight = Math.round(MARK_BOX.height * 0.6);
+const markArt = await sharp(horizontal).extract(MARK_BOX).toBuffer();
+const nameArt = await sharp(horizontal).extract(NAME_BOX).resize({ height: nameHeight, kernel: 'lanczos3' }).toBuffer();
+const nameWidth = (await sharp(nameArt).metadata()).width;
+const headerArt = await sharp({ create: { width: MARK_BOX.width + NAME_GAP + nameWidth, height: MARK_BOX.height, channels: 4, background: clear } })
+  .composite([
+    { input: markArt, left: 0, top: 0 },
+    { input: nameArt, left: MARK_BOX.width + NAME_GAP, top: Math.round((MARK_BOX.height - nameHeight) / 2) },
+  ])
+  .png({ compressionLevel: 9 })
+  .toBuffer();
+await sharp(headerArt).toFile(`${brand}logo-header.png`);
+console.log('✓ src/assets/brand/logo-header.png');
+
 // Light logos for navy backgrounds --------------------------------------------------
 /** `isWordmark({ x, y, width, height })` tells the name text apart from the mark (spheres + swoosh). */
 const lightLogo = async (src, file, isWordmark) => {
@@ -89,7 +113,7 @@ const lightLogo = async (src, file, isWordmark) => {
   await sharp(data, { raw: info }).png({ compressionLevel: 9 }).toFile(`${brand}${file}`);
   console.log(`✓ src/assets/brand/${file}`);
 };
-// Horizontal: the mark fills the left 560 of 1641 px, the name is to its right.
-await lightLogo(horizontal, 'logo-horizontal-light.png', ({ x, width }) => x >= width * (560 / 1641));
+// Header: the name starts after the mark and the gap.
+await lightLogo(headerArt, 'logo-header-light.png', ({ x }) => x >= MARK_BOX.width + NAME_GAP / 2);
 // Stacked: the mark ends by row 496 of 737 and the name starts at 540.
 await lightLogo(stacked, 'logo-stacked-light.png', ({ y, height }) => y >= height * (518 / 737));

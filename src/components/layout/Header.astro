@@ -196,8 +196,10 @@ const langLinks = (['en', 'ar'] as const).map((l) => ({ lang: l, href: switchLan
       if (!link || e.metaKey || e.ctrlKey || e.shiftKey) return;
       e.preventDefault();
       if (link.dataset.lang === langSwitch.dataset.active) return;
-      langSwitch.dataset.active = link.dataset.lang;
-      window.setTimeout(() => (window.location.href = link.href), prefersReducedMotion ? 0 : 260);
+      // On phones there is no thumb (one button for the other language): go straight there.
+      const slides = getComputedStyle(langSwitch.querySelector('.lang__thumb')!).display !== 'none';
+      if (slides) langSwitch.dataset.active = link.dataset.lang;
+      window.setTimeout(() => (window.location.href = link.href), prefersReducedMotion || !slides ? 0 : 260);
     });
 
     /* Mobile menu -------------------------------------------------------- */
@@ -540,7 +542,7 @@ const langLinks = (['en', 'ar'] as const).map((l) => ({ lang: l, href: switchLan
   .mobile__contact a { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-small); font-weight: 600; color: var(--color-blue-300); }
   .mobile__contact :global(svg) { color: var(--color-gold-500); }
 
-  @media (min-width: 760px) {
+  @media (min-width: 900px) {
     .header__actions :global(.header__cta) { display: inline-flex; }
   }
   @media (min-width: 1080px) {
@@ -553,16 +555,50 @@ const langLinks = (['en', 'ar'] as const).map((l) => ({ lang: l, href: switchLan
   @media (min-width: 1080px) and (max-width: 1279px) {
     .header__actions :global(.header__cta) { display: none; }
   }
-  /* Below the desktop nav the logo shares the bar with the slider and buttons only. */
+  /* Below the desktop nav the logo takes the width the rest of the bar leaves it:
+     100cqw is the bar's content width, --logo-ar the artwork's width ÷ height.
+     (The first height is the fallback for browsers without container units.) */
+  .header__inner { container-type: inline-size; }
+  .header__actions { flex: none; }
+  .header { --logo-ar: 4.7; }
   @media (max-width: 1079px) {
-    .header :global(.logo__img) { height: 64px !important; }
+    /* Beside the slider, the CTA and the menu button. */
+    .header :global(.logo__img) {
+      height: 44px !important;
+      height: clamp(44px, calc((100cqw - 456px) / var(--logo-ar)), 64px) !important;
+    }
   }
-  /* Phones: short labels in the slider; the logo grows with the screen width. */
+  @media (max-width: 899px) {
+    /* No CTA: beside the slider and the menu button. */
+    .header :global(.logo__img) {
+      height: 40px !important;
+      height: clamp(40px, calc((100cqw - 210px) / var(--logo-ar)), 64px) !important;
+    }
+  }
+  /* Phones: the slider becomes one small button for the other language, so the
+     logo (and the name in it) gets the room. */
   @media (max-width: 479px) {
     .header__inner { gap: 12px; }
-    .lang__long { display: none; }
+    .lang { grid-template-columns: 1fr; padding: 0; background: none; box-shadow: none; }
+    .lang__thumb,
+    .lang__long,
+    .lang[data-active='en'] .lang__opt[data-lang='en'],
+    .lang[data-active='ar'] .lang__opt[data-lang='ar'] { display: none; }
     .lang__short { display: inline; }
-    .lang__opt { min-width: 40px; padding: 0 8px; }
-    .header :global(.logo__img) { height: clamp(44px, 13.4vw, 58px) !important; }
+    .lang__opt {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0;
+      border-radius: var(--radius-sm);
+      background: var(--color-blue-150);
+      font-size: 1rem;
+    }
+    .lang__opt[lang='ar'] { font-size: 1.15rem; }
+    .menu-open .lang { background: none; box-shadow: none; }
+    .menu-open .lang__opt { background: rgb(255 255 255 / 0.12); color: #fff; }
+    .header :global(.logo__img) {
+      height: 34px !important;
+      height: clamp(26px, calc((100cqw - 116px) / var(--logo-ar)), 58px) !important;
+    }
   }
 </style>

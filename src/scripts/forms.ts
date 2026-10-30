@@ -52,5 +52,34 @@ export function setupValidation(form: HTMLFormElement) {
   };
 }
 
-/** Phone numbers typed without a country code are Saudi (+966). */
-export const withCountryCode = (phone: string) => (phone && !phone.startsWith('+') ? `+966 ${phone}` : phone);
+/**
+ * Country-code menus in phone fields (ui/FormField.astro `countryCode`): keep
+ * the visible "+966" in step with the chosen country, also after a reset.
+ */
+export function setupCountryCodes(form: HTMLFormElement) {
+  const selects = [...form.querySelectorAll<HTMLSelectElement>('select[data-cc]')];
+  const sync = () =>
+    selects.forEach((select) => {
+      const code = select.parentElement?.querySelector('[data-cc-code]');
+      if (code) code.textContent = `+${select.selectedOptions[0]?.dataset.dial ?? ''}`;
+    });
+  selects.forEach((select) => select.addEventListener('change', sync));
+  form.addEventListener('reset', () => window.setTimeout(sync));
+  sync(); // the browser may restore an earlier choice (back / forward)
+}
+
+/**
+ * The full number of a phone field: the chosen country's code + the number
+ * typed. A number typed with "+" or "00" is kept as entered; a leading trunk 0
+ * is dropped (05… → +966 5…), except for Italy (+39), where it is part of the
+ * number.
+ */
+export function fullPhone(form: HTMLFormElement, name: string) {
+  const input = form.elements.namedItem(name) as HTMLInputElement | null;
+  const phone = (input?.value ?? '').trim().replace(/\s+/g, ' ');
+  if (!phone || phone.startsWith('+')) return phone;
+  if (phone.startsWith('00')) return `+${phone.slice(2).trimStart()}`;
+  const select = input?.closest('[data-field]')?.querySelector<HTMLSelectElement>('select[data-cc]');
+  const dial = select?.selectedOptions[0]?.dataset.dial ?? '966';
+  return `+${dial} ${dial === '39' ? phone : phone.replace(/^0/, '')}`;
+}

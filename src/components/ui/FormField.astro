@@ -1,11 +1,16 @@
 ---
 /**
  * Labelled form control: light-blue fill, bold label, "*Mandatory" marker,
- * optional icon or prefix chip inside the field. Email and phone fields stay
- * left-to-right on Arabic pages. The error element id is `${id}-error`,
- * filled by scripts/forms.ts.
+ * optional icon inside the field. Email and phone fields stay left-to-right on
+ * Arabic pages. The error element id is `${id}-error`, filled by
+ * scripts/forms.ts.
+ * `countryCode` (phone fields): a dialling-code chip ("+966 ▾") in front of the
+ * number; it is a native <select> of every country (lib/countries.ts), so phones
+ * show their own picker. scripts/forms.ts keeps the chip in step and joins code
+ * and number on submit (fullPhone).
  */
 import { getContent } from '@/data';
+import { countryCodes, DEFAULT_COUNTRY } from '@/lib/countries';
 import Icon from './Icon.astro';
 import type { IconName } from './icons';
 
@@ -28,8 +33,8 @@ interface Props {
   maxlength?: number;
   inputmode?: 'text' | 'email' | 'tel' | 'numeric';
   icon?: IconName;
-  /** Short prefix chip shown inside the field (e.g. "+966"). */
-  prefix?: string;
+  /** Phone fields: country dialling-code menu in front of the number. */
+  countryCode?: boolean;
   autofocus?: boolean;
   class?: string;
 }
@@ -47,24 +52,46 @@ const {
   maxlength,
   inputmode,
   icon,
-  prefix,
+  countryCode = false,
   autofocus,
   class: className,
 } = Astro.props;
 
-const { ui } = getContent(Astro.url);
+const { ui, lang, dir } = getContent(Astro.url);
 const errorId = `${id}-error`;
 const ltr = type === 'email' || type === 'tel';
+const countries = countryCode ? countryCodes(lang) : null;
+const defaultDial = countries?.first.find((c) => c.iso === DEFAULT_COUNTRY)?.dial;
 ---
 
-<div class:list={['field', `field--${type}`, { 'field--icon': icon, 'field--prefix': prefix }, className]} data-field>
+<div class:list={['field', `field--${type}`, { 'field--icon': icon, 'field--cc': countryCode }, className]} data-field>
   <div class="field__head">
     <label for={id} class="field__label">{label}</label>
     {required && <span class="field__req">{ui.form.mandatory}</span>}
   </div>
 
   <div class="field__box" dir={ltr ? 'ltr' : undefined}>
-    {prefix && <span class="field__prefix" aria-hidden="true">{prefix}</span>}
+    {
+      countries && (
+        <span class="field__cc">
+          <span class="field__cc-code" aria-hidden="true" data-cc-code>+{defaultDial}</span>
+          <Icon name="chevron-down" size={14} strokeWidth={2.4} class="field__cc-icon" />
+          <select class="field__cc-select" aria-label={ui.form.countryCode} dir={dir} data-cc>
+            {countries.first.map((c) => (
+              <option value={c.iso} data-dial={c.dial} selected={c.iso === DEFAULT_COUNTRY}>
+                {c.label}
+              </option>
+            ))}
+            <option disabled>──────────</option>
+            {countries.all.map((c) => (
+              <option value={c.iso} data-dial={c.dial}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </span>
+      )
+    }
     {
       type === 'textarea' ? (
         <textarea id={id} name={name} rows={rows} required={required} maxlength={maxlength} aria-describedby={errorId} class="field__control" />
@@ -81,7 +108,7 @@ const ltr = type === 'email' || type === 'tel';
           name={name}
           type={type}
           required={required}
-          autocomplete={autocomplete}
+          autocomplete={countryCode ? 'tel-national' : autocomplete}
           inputmode={inputmode}
           maxlength={maxlength}
           aria-describedby={errorId}
@@ -147,15 +174,19 @@ const ltr = type === 'email' || type === 'tel';
     pointer-events: none;
   }
 
-  .field--prefix .field__control { padding-inline-start: 70px; }
-  .field__prefix {
+  /* Dialling-code chip: shows "+966 ▾"; the invisible native <select> on top
+     of it opens the country list. */
+  .field--cc .field__control { padding-inline-start: 102px; }
+  .field__cc {
     position: absolute;
     inset-block: 1.5px;
     inset-inline-start: 1.5px;
     z-index: 1;
-    display: grid;
-    place-items: center;
-    width: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 88px;
     border-start-start-radius: calc(var(--radius-sm) - 1.5px);
     border-end-start-radius: calc(var(--radius-sm) - 1.5px);
     background: var(--color-blue-150);
@@ -163,7 +194,21 @@ const ltr = type === 'email' || type === 'tel';
     font-size: var(--fs-xs);
     font-weight: 700;
     color: var(--color-navy-950);
+    transition: background-color 0.2s var(--ease);
   }
+  .field__cc:hover { background: var(--color-blue-200); }
+  .field__cc :global(.field__cc-icon) { flex: none; color: #6b7383; }
+  .field__cc-select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: 0;
+    font-size: 16px; /* no zoom-in on iPhone when it opens */
+    cursor: pointer;
+  }
+  .field__cc:has(.field__cc-select:focus-visible) { outline: 2.5px solid var(--color-orange-600); outline-offset: 2px; }
 
   .field__error { margin: 0; font-size: var(--fs-xs); font-weight: 600; color: #be123c; }
   .field__error:empty { display: none; }

@@ -58,7 +58,7 @@ const { endpoint, web3formsKey } = formTarget('josoorkom');
       <div class="jd__grid">
         <FormField id="jd-first-name" name="firstName" label={t.firstName} required autocomplete="given-name" maxlength={80} autofocus />
         <FormField id="jd-last-name" name="lastName" label={t.lastName} required autocomplete="family-name" maxlength={80} />
-        <FormField id="jd-mobile" name="mobile" type="tel" label={t.mobile} required autocomplete="tel" inputmode="tel" maxlength={32} prefix="+966" class="jd__full" />
+        <FormField id="jd-mobile" name="mobile" type="tel" label={t.mobile} required autocomplete="tel" inputmode="tel" maxlength={32} countryCode class="jd__full" />
         <FormField id="jd-email" name="email" type="email" label={t.email} required autocomplete="email" inputmode="email" maxlength={160} class="jd__full" />
       </div>
       <div class="jd__trap" aria-hidden="true">
@@ -74,7 +74,7 @@ const { endpoint, web3formsKey } = formTarget('josoorkom');
 
 <script>
   import { lockScroll, unlockScroll } from '@/scripts/smooth-scroll';
-  import { setupValidation, withCountryCode } from '@/scripts/forms';
+  import { fullPhone, setupCountryCodes, setupValidation } from '@/scripts/forms';
 
   const dialog = document.querySelector<HTMLDialogElement>('[data-josoorkom-dialog]');
   const form = dialog?.querySelector<HTMLFormElement>('[data-jd-form]');
@@ -85,6 +85,7 @@ const { endpoint, web3formsKey } = formTarget('josoorkom');
     const status = form.querySelector<HTMLElement>('[data-jd-status]')!;
     const submitBtn = form.querySelector<HTMLButtonElement>('[data-jd-submit]')!;
     const validation = setupValidation(form);
+    setupCountryCodes(form);
 
     const open = () => {
       validation.reset();
@@ -115,7 +116,7 @@ const { endpoint, web3formsKey } = formTarget('josoorkom');
       const data = new FormData(form);
       if (String(data.get('website') ?? '').trim()) return; // bot
       data.delete('website');
-      data.set('mobile', withCountryCode(String(data.get('mobile') ?? '').trim()));
+      data.set('mobile', fullPhone(form, 'mobile'));
 
       submitBtn.disabled = true;
       status.textContent = form.dataset.msgRedirecting ?? '';

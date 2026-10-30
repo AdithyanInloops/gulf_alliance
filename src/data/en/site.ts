@@ -75,6 +75,7 @@ export const UI = {
     required: 'Please fill in this field.',
     email: 'Please enter a valid email address.',
     phone: 'Please enter a valid phone number.',
+    countryCode: 'Country code',
     checkFields: 'Please check the highlighted fields.',
     sending: 'Sending…',
     success: 'Thank you — your enquiry has been sent. Our team will be in touch.',

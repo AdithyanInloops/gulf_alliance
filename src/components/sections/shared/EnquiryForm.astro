@@ -67,7 +67,7 @@ const email = SITE.contact.email;
     <FormField id={f('name')} name="fullName" label={fields.fullName} required autocomplete="name" maxlength={120} icon={icons ? 'user' : undefined} />
     <FormField id={f('company')} name="company" label={fields.company} autocomplete="organization" maxlength={160} icon={icons ? 'building-2' : undefined} />
     <FormField id={f('email')} name="email" type="email" label={fields.email} required autocomplete="email" inputmode="email" maxlength={160} icon={icons ? 'at-sign' : undefined} />
-    <FormField id={f('phone')} name="phone" type="tel" label={fields.phone} required autocomplete="tel" inputmode="tel" maxlength={32} icon={icons ? 'phone' : undefined} prefix="+966" />
+    <FormField id={f('phone')} name="phone" type="tel" label={fields.phone} required autocomplete="tel" inputmode="tel" maxlength={32} icon={icons ? 'phone' : undefined} countryCode />
     <FormField id={f('solution')} name="solution" type="select" label={fields.solution} options={options} class="ef__full" />
     <FormField id={f('message')} name="message" type="textarea" label={fields.message} required rows={4} maxlength={4000} class="ef__full" />
   </div>
@@ -95,7 +95,7 @@ const email = SITE.contact.email;
 </form>
 
 <script>
-  import { setupValidation, withCountryCode } from '@/scripts/forms';
+  import { fullPhone, setupCountryCodes, setupValidation } from '@/scripts/forms';
 
   document.querySelectorAll<HTMLFormElement>('[data-enquiry-form]').forEach((form) => {
     const d = form.dataset;
@@ -106,6 +106,7 @@ const email = SITE.contact.email;
     const submitBtn = form.querySelector<HTMLButtonElement>('[data-submit]')!;
     const select = form.querySelector<HTMLSelectElement>('select[name="solution"]');
     const validation = setupValidation(form);
+    setupCountryCodes(form);
 
     // Preselect from the page (data-preselect) or the URL (?solution=medical).
     const wanted = new URLSearchParams(window.location.search).get('solution') || d.preselect;
@@ -126,7 +127,7 @@ const email = SITE.contact.email;
       const data = new FormData(form);
       if (String(data.get('website') ?? '').trim()) return; // bot
       data.delete('website');
-      data.set('phone', withCountryCode(String(data.get('phone') ?? '').trim()));
+      data.set('phone', fullPhone(form, 'phone'));
       const solutionLabel = select?.value ? select.selectedOptions[0].text : '';
       const solutionEn = select?.value ? (JSON.parse(d.solutionNamesEn ?? '{}') as Record<string, string>)[select.value] ?? solutionLabel : '';
       const subject = `${d.subject}${solutionLabel ? ` – ${solutionLabel}` : ''}`;
